@@ -33,6 +33,7 @@ export class LuciformXMLParser {
   private mode: 'strict' | 'permissive' | 'luciform-permissive';
   private maxRecoveries?: number;
   private recoveryStopIssued: boolean = false;
+  private coalesceTextNodes: boolean;
 
   constructor(content: string, options: ParserOptions = {}) {
     this.content = content;
@@ -47,6 +48,7 @@ export class LuciformXMLParser {
     this.useUnicodeNames = options.useUnicodeNames || true;
     this.mode = options.mode || 'luciform-permissive';
     this.maxRecoveries = options.maxRecoveries;
+    this.coalesceTextNodes = options.coalesceTextNodes ?? true;
   }
 
   /**
@@ -493,6 +495,15 @@ export class LuciformXMLParser {
         token.location
       );
       return;
+    }
+
+    // Coalesce with previous text node if enabled
+    if (this.coalesceTextNodes && parent.children && parent.children.length > 0) {
+      const last = parent.children[parent.children.length - 1];
+      if (last && last.type === 'text') {
+        last.content = (last.content || '') + content;
+        return;
+      }
     }
 
     const textNode = new XMLNode('text', content, token.location);

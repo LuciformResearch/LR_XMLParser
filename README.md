@@ -105,6 +105,9 @@ export class LuciformXMLParser {
 
 Options include security and performance limits (depth, text length, entity expansion), plus mode: `strict | permissive | luciform-permissive`.
 
+Additional option:
+- `coalesceTextNodes?: boolean` (default `true`): merges adjacent text nodes under the same parent to reduce node fragmentation without changing text content.
+
 Namespace-aware queries:
 ```ts
 // Given <root xmlns:foo="urn:foo"><foo:item/></root>

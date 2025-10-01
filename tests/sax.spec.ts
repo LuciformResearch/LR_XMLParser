@@ -29,4 +29,15 @@ describe('LuciformSAX', () => {
     expect(seen.comment).toBe(true);
     expect(seen.cdata).toBe(false);
   });
+
+  it('emits PI and Doctype events', () => {
+    const xml = '<?pi test?><!DOCTYPE note SYSTEM "id"><root/>';
+    const seen: { pi?: string; dt?: string } = {};
+    new LuciformSAX(xml, {
+      onPI: (content) => (seen.pi = content),
+      onDoctype: (content) => (seen.dt = content),
+    }).run();
+    expect(seen.pi).toContain('pi test');
+    expect(seen.dt?.toUpperCase()).toContain('DOCTYPE');
+  });
 });
