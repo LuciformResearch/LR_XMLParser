@@ -5,7 +5,7 @@
 [![types](https://img.shields.io/badge/types-included-blue)](./dist/types/index.d.ts)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
-[![Benchmarks](https://img.shields.io/badge/Benchmarks-suite-green)](./test-integration.ts)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-suite-green)](./docs/BENCHMARKS.md)
 [![Status](https://img.shields.io/badge/Status-Ready%20for%20LLM%20workflows-success)](#key-use-cases)
 
 High‑performance XML parser designed for modern AI pipelines. LR XMLParser is optimized for LLM‑generated XML (permissive mode with error recovery) while remaining strict, traceable, and secure for production workloads.
@@ -165,6 +165,14 @@ Validated internally on:
 - Complex XML with CDATA and comments
 - Performance and limits
 - Compatibility wrapper available
+
+## Benchmarks
+
+- Quick start:
+  - Build: `npm run build`
+  - Run: `npm run bench`
+- Outputs throughput and average latency for several corpora, plus memory deltas when GC is available.
+- Writes JSON reports to `Reports/Benchmarks/` for later comparison. See `docs/BENCHMARKS.md` for details.
 
 ## Links and integrations
 

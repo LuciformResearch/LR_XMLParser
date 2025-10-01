@@ -43,3 +43,8 @@ All notable changes to this project will be documented in this file.
   - Enrich `recoveryReport` with optional `codes` and `notes` for better visibility into recovery categories and decisions.
   - Add unit tests for `LuciformSAX` event emission and closed flags.
   - Add benchmarks scaffold (`docs/BENCHMARKS.md`, `scripts/bench/basic.mjs`) and npm script `bench`; JSON reports saved to `Reports/Benchmarks/`.
+- 0.2.3
+  - Translate all user-facing diagnostic messages and suggestions to English.
+  - Add `coalesceTextNodes` parser option (default true) to merge adjacent text nodes.
+  - Benchmarks: add memory metrics (heap delta) and show GC mode; JSON report enriched.
+  - Add SAX unit tests for PI and DOCTYPE events.

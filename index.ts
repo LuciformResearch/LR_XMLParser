@@ -95,15 +95,15 @@ export class LuciformXMLParser {
       const report = diagnostics.getRecoveryReport();
       diagnostics.addInfo(
         XML_ERROR_CODES.RECOVERY_ATTEMPTED,
-        `Tentative de récupération: limite maxRecoveries dépassée après ${report.attempts} corrections`,
+        `Recovery attempts limit (maxRecoveries) exceeded after ${report.attempts} fixes`,
         location
       );
       diagnostics.addRecoveryNote('maxRecoveries exceeded: stopping further scanning');
       diagnostics.addInfo(
         XML_ERROR_CODES.PARTIAL_PARSE,
-        'Parsing arrêté après dépassement de la limite de récupération',
+        'Parsing stopped after exceeding recovery limit',
         location,
-        'Augmentez maxRecoveries pour autoriser davantage de corrections'
+        'Increase maxRecoveries to allow further fixes'
       );
       diagnostics.addRecoveryNote('partial parse returned due to recovery cap');
       this.recoveryStopIssued = true;
@@ -261,7 +261,7 @@ export class LuciformXMLParser {
     if (depth > this.maxDepth) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_DEPTH_EXCEEDED,
-        `Profondeur maximale dépassée: ${depth}`,
+        `Maximum depth exceeded: ${depth}`,
         startToken.location
       );
       return null;
@@ -312,14 +312,14 @@ export class LuciformXMLParser {
           if (prefix === 'xmlns') {
             diagnostics.addError(
               XML_ERROR_CODES.INVALID_NAMESPACE,
-              'Le préfixe "xmlns" est réservé',
+              'The "xmlns" prefix is reserved',
               startToken.location
             );
             diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_NAMESPACE);
           } else if (prefix === 'xml' && value !== 'http://www.w3.org/XML/1998/namespace') {
             diagnostics.addError(
               XML_ERROR_CODES.INVALID_NAMESPACE,
-              'Le préfixe "xml" doit être lié à http://www.w3.org/XML/1998/namespace',
+              'The "xml" prefix must bind to http://www.w3.org/XML/1998/namespace',
               startToken.location
             );
             diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_NAMESPACE);
@@ -336,7 +336,7 @@ export class LuciformXMLParser {
       if (/^xmlns(?::|$)/.test(element.name)) {
         diagnostics.addError(
           XML_ERROR_CODES.XMLNS_PREFIX_RESERVED,
-          'Le préfixe ou nom "xmlns" est réservé',
+          'The "xmlns" prefix or name is reserved',
           startToken.location
         );
         diagnostics.incrementRecovery(XML_ERROR_CODES.XMLNS_PREFIX_RESERVED);
@@ -350,7 +350,7 @@ export class LuciformXMLParser {
         for (const dup of startToken.duplicateAttributes) {
           diagnostics.addWarning(
             XML_ERROR_CODES.DUPLICATE_ATTRIBUTE,
-            `Attribut dupliqué: ${dup}`,
+            `Duplicate attribute: ${dup}`,
             startToken.location
           );
           diagnostics.incrementRecovery(XML_ERROR_CODES.DUPLICATE_ATTRIBUTE);
@@ -362,14 +362,14 @@ export class LuciformXMLParser {
             const name = inval.replace(/\/\*missing-space\*\/$/, '');
             diagnostics.addWarning(
               XML_ERROR_CODES.ATTR_MISSING_SPACE,
-              `Espace requis après la valeur de "${name}"`,
+              `Space required after value of "${name}"`,
               startToken.location
             );
             diagnostics.incrementRecovery(XML_ERROR_CODES.ATTR_MISSING_SPACE);
           } else {
             diagnostics.addWarning(
               XML_ERROR_CODES.ATTR_NO_VALUE,
-              `Attribut sans valeur ou non quotée: ${inval}`,
+              `Attribute without value or unquoted value: ${inval}`,
               startToken.location
             );
             diagnostics.incrementRecovery(XML_ERROR_CODES.ATTR_NO_VALUE);
@@ -382,7 +382,7 @@ export class LuciformXMLParser {
         if (count >= this.maxAttrCount) {
           diagnostics.addError(
             XML_ERROR_CODES.INVALID_ATTRIBUTE,
-            `Nombre d'attributs dépassé: > ${this.maxAttrCount}`,
+            `Attribute count exceeded: > ${this.maxAttrCount}`,
             startToken.location
           );
           diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_ATTRIBUTE);
@@ -391,7 +391,7 @@ export class LuciformXMLParser {
         if (value.length > this.maxAttrValueLength) {
           diagnostics.addError(
             XML_ERROR_CODES.INVALID_ATTRIBUTE,
-            `Valeur d'attribut trop longue (${value.length} > ${this.maxAttrValueLength}) pour ${name}`,
+            `Attribute value too long (${value.length} > ${this.maxAttrValueLength}) for ${name}`,
             startToken.location
           );
           diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_ATTRIBUTE);
@@ -435,9 +435,9 @@ export class LuciformXMLParser {
           } else {
             diagnostics.addError(
               XML_ERROR_CODES.MISMATCHED_TAG,
-              `Balises non appariées: ${element.name} vs ${token.tagName}`,
+              `Mismatched tags: ${element.name} vs ${token.tagName}`,
               token.location,
-              `Fermez la balise ${element.name}`
+              `Close tag ${element.name}`
             );
             diagnostics.incrementRecovery(XML_ERROR_CODES.MISMATCHED_TAG);
           }
@@ -468,9 +468,9 @@ export class LuciformXMLParser {
     if (!element.closed) {
       diagnostics.addError(
         XML_ERROR_CODES.UNCLOSED_TAG,
-        `Balise non fermée: ${element.name}`,
+        `Unclosed tag: ${element.name}`,
         startToken.location,
-        `Ajoutez </${element.name}>`
+        `Add </${element.name}>`
       );
       diagnostics.incrementRecovery(XML_ERROR_CODES.UNCLOSED_TAG);
     }
@@ -491,7 +491,7 @@ export class LuciformXMLParser {
     if (content.length > this.maxTextLength) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED,
-        `Longueur de texte maximale dépassée: ${content.length}`,
+        `Maximum text length exceeded: ${content.length}`,
         token.location
       );
       return;
@@ -523,7 +523,7 @@ export class LuciformXMLParser {
     if (content.length > this.maxCommentLength) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED,
-        `Longueur de commentaire maximale dépassée: ${content.length}`,
+        `Maximum comment length exceeded: ${content.length}`,
         token.location
       );
       return;
@@ -532,9 +532,9 @@ export class LuciformXMLParser {
     if (!token.closed) {
       diagnostics.addWarning(
         XML_ERROR_CODES.INVALID_COMMENT,
-        'Commentaire non fermé correctement',
+        'Comment not properly closed',
         token.location,
-        'Utilisez --> pour fermer le commentaire'
+        'Use --> to close the comment'
       );
       diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_COMMENT);
     }
@@ -556,9 +556,9 @@ export class LuciformXMLParser {
     if (!token.closed) {
       diagnostics.addError(
         XML_ERROR_CODES.INVALID_CDATA,
-        'Section CDATA non fermée correctement',
+        'CDATA section not properly closed',
         token.location,
-        'Utilisez ]]> pour fermer la section CDATA'
+        'Use ]]> to close the CDATA section'
       );
       diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_CDATA);
     }
@@ -580,7 +580,7 @@ export class LuciformXMLParser {
     if (content.length > this.maxPILength) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED,
-        `Longueur d'instruction maximale dépassée: ${content.length}`,
+        `Maximum processing instruction length exceeded: ${content.length}`,
         token.location
       );
       return;
@@ -589,9 +589,9 @@ export class LuciformXMLParser {
     if (!token.closed) {
       diagnostics.addWarning(
         XML_ERROR_CODES.INVALID_PI,
-        'Instruction de traitement non fermée correctement',
+        'Processing instruction not properly closed',
         token.location,
-        "Utilisez ?> pour fermer l'instruction"
+        'Use ?> to close the instruction'
       );
       diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_PI);
     }

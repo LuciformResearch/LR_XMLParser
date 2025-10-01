@@ -1,7 +1,7 @@
 # LR XMLParser — Parser XML modulaire, robuste et sûr
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
-[![Benchmarks](https://img.shields.io/badge/Benchmarks-~2x%20plus%20rapide-green)](./test-integration.ts)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-suite-green)](./docs/BENCHMARKS.md)
 [![Status](https://img.shields.io/badge/Status-Ready%20for%20LLM%20workflows-success)](#usages-cl%C3%A9s)
 
 Parser XML hautes performances, conçu pour les pipelines IA modernes. Optimisé pour le XML généré par des LLM (mode permissif et récupération d’erreurs), tout en restant strict, traçable et sécurisé pour la production.
@@ -146,6 +146,14 @@ Validé en interne sur:
 - XML complexe avec CDATA et commentaires
 - Performance et limites
 - Compatibilité d’API (couche de compatibilité disponible)
+
+## Benchmarks
+
+- Démarrage rapide:
+  - Build: `npm run build`
+  - Exécution: `npm run bench`
+- Affiche le débit et la latence moyenne pour plusieurs corpus, ainsi que les deltas mémoire (si GC activé).
+- Écrit des rapports JSON dans `Reports/Benchmarks/`. Voir `docs/BENCHMARKS.md` pour les détails.
 
 ## Gestion des erreurs
 

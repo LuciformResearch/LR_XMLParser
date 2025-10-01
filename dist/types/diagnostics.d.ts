@@ -1,8 +1,8 @@
 /**
- * Diagnostics - Gestion des erreurs et avertissements XML
+ * Diagnostics - XML errors and warnings management
  *
- * Système de diagnostic pour le parser XML avec codes d'erreur
- * et suggestions de correction
+ * Diagnostic system for the XML parser with error codes
+ * and remediation suggestions
  */
 import { Diagnostic, Location } from './types';
 export declare class DiagnosticManager {
@@ -14,43 +14,43 @@ export declare class DiagnosticManager {
     private recoveryCodes;
     private recoveryNotes;
     /**
-     * Ajoute un diagnostic
+     * Add a diagnostic
      */
     addDiagnostic(diagnostic: Diagnostic): void;
     /**
-     * Ajoute une erreur
+     * Add an error
      */
     addError(code: string, message: string, location?: Location, suggestion?: string): void;
     /**
-     * Ajoute un avertissement
+     * Add a warning
      */
     addWarning(code: string, message: string, location?: Location, suggestion?: string): void;
     /**
-     * Ajoute une info
+     * Add an info
      */
     addInfo(code: string, message: string, location?: Location, suggestion?: string): void;
     /**
-     * Incrémente le compteur de récupération
+     * Increment recovery counter
      */
     incrementRecovery(code?: string): void;
     /**
-     * Obtient tous les diagnostics
+     * Get all diagnostics
      */
     getDiagnostics(): Diagnostic[];
     /**
-     * Obtient les erreurs
+     * Get errors
      */
     getErrors(): Diagnostic[];
     /**
-     * Obtient les avertissements
+     * Get warnings
      */
     getWarnings(): Diagnostic[];
     /**
-     * Obtient les infos
+     * Get infos
      */
     getInfos(): Diagnostic[];
     /**
-     * Obtient le nombre de récupérations
+     * Get recovery count
      */
     getRecoveryCount(): number;
     setRecoveryCap(cap?: number): void;
@@ -61,23 +61,23 @@ export declare class DiagnosticManager {
         notes?: string[];
     };
     /**
-     * Indique si la limite de récupération a été dépassée
+     * Whether recovery limit has been exceeded
      */
     isRecoveryCapped(): boolean;
     /**
-     * Vérifie s'il y a des erreurs
+     * Check if there are errors
      */
     hasErrors(): boolean;
     /**
-     * Vérifie s'il y a des avertissements
+     * Check if there are warnings
      */
     hasWarnings(): boolean;
     /**
-     * Remet à zéro les diagnostics
+     * Reset diagnostics
      */
     reset(): void;
     /**
-     * Obtient un résumé des diagnostics
+     * Get diagnostics summary
      */
     getSummary(): {
         total: number;
@@ -87,7 +87,7 @@ export declare class DiagnosticManager {
         recoveries: number;
     };
     /**
-     * Ajoute une note de récupération (pour le rapport)
+     * Add a recovery note (for the report)
      */
     addRecoveryNote(note: string): void;
 }
@@ -125,59 +125,59 @@ export declare const XML_ERROR_CODES: {
  * Messages d'erreur par défaut
  */
 export declare const XML_ERROR_MESSAGES: {
-    readonly INVALID_CHARACTER: "Caractère invalide dans le XML";
-    readonly MALFORMED_TAG: "Balise malformée";
-    readonly UNCLOSED_TAG: "Balise non fermée";
-    readonly MISMATCHED_TAG: "Balises non appariées";
-    readonly DUPLICATE_ATTRIBUTE: "Attribut dupliqué";
-    readonly INVALID_ATTRIBUTE: "Attribut invalide";
-    readonly MISSING_ROOT: "Élément racine manquant";
-    readonly MULTIPLE_ROOTS: "Plusieurs éléments racines";
-    readonly INVALID_NESTING: "Imbrication invalide";
-    readonly INVALID_CDATA: "Section CDATA invalide";
-    readonly INVALID_COMMENT: "Commentaire invalide";
-    readonly INVALID_PI: "Instruction de traitement invalide";
-    readonly INVALID_DOCTYPE: "Déclaration DOCTYPE invalide";
-    readonly INVALID_NAMESPACE: "Namespace invalide";
-    readonly UNDEFINED_PREFIX: "Préfixe non défini";
-    readonly XMLNS_PREFIX_RESERVED: "Le préfixe \"xmlns\" est réservé";
-    readonly XML_PREFIX_URI: "Le préfixe \"xml\" doit être lié à l'URI standard";
-    readonly BAD_QNAME: "Nom qualifié (QName) invalide";
-    readonly ATTR_MISSING_SPACE: "Espace requis après la valeur de l'attribut";
-    readonly ATTR_NO_VALUE: "Attribut sans valeur ou valeur non quotée";
-    readonly ENTITY_EXPANSION_LIMIT: "Limite d'expansion d'entité dépassée";
-    readonly MAX_DEPTH_EXCEEDED: "Profondeur maximale dépassée";
-    readonly MAX_TEXT_LENGTH_EXCEEDED: "Longueur de texte maximale dépassée";
-    readonly RECOVERY_ATTEMPTED: "Tentative de récupération";
-    readonly PARTIAL_PARSE: "Parse partiel effectué";
+    readonly INVALID_CHARACTER: "Invalid character in XML";
+    readonly MALFORMED_TAG: "Malformed tag";
+    readonly UNCLOSED_TAG: "Unclosed tag";
+    readonly MISMATCHED_TAG: "Mismatched tags";
+    readonly DUPLICATE_ATTRIBUTE: "Duplicate attribute";
+    readonly INVALID_ATTRIBUTE: "Invalid attribute";
+    readonly MISSING_ROOT: "Missing root element";
+    readonly MULTIPLE_ROOTS: "Multiple root elements";
+    readonly INVALID_NESTING: "Invalid nesting";
+    readonly INVALID_CDATA: "Invalid CDATA section";
+    readonly INVALID_COMMENT: "Invalid comment";
+    readonly INVALID_PI: "Invalid processing instruction";
+    readonly INVALID_DOCTYPE: "Invalid DOCTYPE declaration";
+    readonly INVALID_NAMESPACE: "Invalid namespace";
+    readonly UNDEFINED_PREFIX: "Undefined prefix";
+    readonly XMLNS_PREFIX_RESERVED: "The \"xmlns\" prefix is reserved";
+    readonly XML_PREFIX_URI: "The \"xml\" prefix must bind to the standard URI";
+    readonly BAD_QNAME: "Invalid qualified name (QName)";
+    readonly ATTR_MISSING_SPACE: "Space required after attribute value";
+    readonly ATTR_NO_VALUE: "Attribute without value or unquoted value";
+    readonly ENTITY_EXPANSION_LIMIT: "Entity expansion limit exceeded";
+    readonly MAX_DEPTH_EXCEEDED: "Maximum depth exceeded";
+    readonly MAX_TEXT_LENGTH_EXCEEDED: "Maximum text length exceeded";
+    readonly RECOVERY_ATTEMPTED: "Recovery attempted";
+    readonly PARTIAL_PARSE: "Partial parse performed";
 };
 /**
  * Suggestions de correction par défaut
  */
 export declare const XML_ERROR_SUGGESTIONS: {
-    readonly INVALID_CHARACTER: "Vérifiez l'encodage du fichier";
-    readonly MALFORMED_TAG: "Vérifiez la syntaxe de la balise";
-    readonly UNCLOSED_TAG: "Ajoutez la balise de fermeture correspondante";
-    readonly MISMATCHED_TAG: "Vérifiez l'appariement des balises";
-    readonly DUPLICATE_ATTRIBUTE: "Supprimez l'attribut dupliqué";
-    readonly INVALID_ATTRIBUTE: "Vérifiez la syntaxe de l'attribut";
-    readonly MISSING_ROOT: "Ajoutez un élément racine";
-    readonly MULTIPLE_ROOTS: "Supprimez les éléments racines supplémentaires";
-    readonly INVALID_NESTING: "Vérifiez l'imbrication des éléments";
-    readonly INVALID_CDATA: "Vérifiez la syntaxe CDATA";
-    readonly INVALID_COMMENT: "Vérifiez la syntaxe du commentaire";
-    readonly INVALID_PI: "Vérifiez la syntaxe de l'instruction de traitement";
-    readonly INVALID_DOCTYPE: "Vérifiez la syntaxe DOCTYPE";
-    readonly INVALID_NAMESPACE: "Vérifiez la déclaration du namespace";
-    readonly UNDEFINED_PREFIX: "Définissez le préfixe ou utilisez xmlns";
-    readonly XMLNS_PREFIX_RESERVED: "N'utilisez pas \"xmlns\" comme préfixe applicatif";
-    readonly XML_PREFIX_URI: "Utilisez http://www.w3.org/XML/1998/namespace pour \"xml\"";
-    readonly BAD_QNAME: "Limitez le QName à un seul \":\" et un nom valide";
-    readonly ATTR_MISSING_SPACE: "Ajoutez un espace avant le prochain attribut";
-    readonly ATTR_NO_VALUE: "Entourez la valeur d'apostrophes ou guillemets";
-    readonly ENTITY_EXPANSION_LIMIT: "Réduisez la complexité des entités";
-    readonly MAX_DEPTH_EXCEEDED: "Réduisez la profondeur d'imbrication";
-    readonly MAX_TEXT_LENGTH_EXCEEDED: "Réduisez la longueur du texte";
-    readonly RECOVERY_ATTEMPTED: "Le parser a tenté de récupérer automatiquement";
-    readonly PARTIAL_PARSE: "Le parsing a été effectué partiellement";
+    readonly INVALID_CHARACTER: "Check file encoding";
+    readonly MALFORMED_TAG: "Verify tag syntax";
+    readonly UNCLOSED_TAG: "Add the corresponding closing tag";
+    readonly MISMATCHED_TAG: "Verify tag pairing";
+    readonly DUPLICATE_ATTRIBUTE: "Remove the duplicate attribute";
+    readonly INVALID_ATTRIBUTE: "Verify attribute syntax";
+    readonly MISSING_ROOT: "Add a root element";
+    readonly MULTIPLE_ROOTS: "Remove extra root elements";
+    readonly INVALID_NESTING: "Verify element nesting";
+    readonly INVALID_CDATA: "Verify CDATA syntax";
+    readonly INVALID_COMMENT: "Verify comment syntax";
+    readonly INVALID_PI: "Verify processing instruction syntax";
+    readonly INVALID_DOCTYPE: "Verify DOCTYPE syntax";
+    readonly INVALID_NAMESPACE: "Verify namespace declaration";
+    readonly UNDEFINED_PREFIX: "Define the prefix or declare it with xmlns";
+    readonly XMLNS_PREFIX_RESERVED: "Do not use \"xmlns\" as an application prefix";
+    readonly XML_PREFIX_URI: "Use http://www.w3.org/XML/1998/namespace for \"xml\"";
+    readonly BAD_QNAME: "Limit QName to a single \":\" and a valid name";
+    readonly ATTR_MISSING_SPACE: "Add a space before the next attribute";
+    readonly ATTR_NO_VALUE: "Quote the attribute value with \" or '";
+    readonly ENTITY_EXPANSION_LIMIT: "Reduce entity complexity";
+    readonly MAX_DEPTH_EXCEEDED: "Reduce nesting depth";
+    readonly MAX_TEXT_LENGTH_EXCEEDED: "Reduce text length";
+    readonly RECOVERY_ATTEMPTED: "The parser attempted automatic recovery";
+    readonly PARTIAL_PARSE: "Parsing was performed partially";
 };

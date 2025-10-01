@@ -65,6 +65,7 @@ export interface ScannerOptions {
 export interface ParserOptions extends ScannerOptions {
     mode?: 'strict' | 'permissive' | 'luciform-permissive';
     maxRecoveries?: number;
+    coalesceTextNodes?: boolean;
 }
 export interface XMLNode {
     type: 'element' | 'text' | 'comment' | 'pi' | 'cdata' | 'doctype';

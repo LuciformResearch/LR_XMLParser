@@ -30,6 +30,8 @@ function hrtimeMs(start, end) {
 }
 
 async function runCase(name, xml, iterations, Parser) {
+  global.gc && global.gc();
+  const memBefore = process.memoryUsage();
   const start = process.hrtime.bigint();
   let success = 0;
   for (let i = 0; i < iterations; i++) {
@@ -40,14 +42,23 @@ async function runCase(name, xml, iterations, Parser) {
   const ms = hrtimeMs(start, end);
   const avg = ms / iterations;
   const tps = (iterations * 1000) / ms;
-  console.log(`[bench] ${name}: ${iterations} iters in ${ms.toFixed(1)}ms | avg ${avg.toFixed(3)}ms | ${tps.toFixed(1)} docs/s | success ${success}/${iterations}`);
-  return { name, iterations, ms, avgMs: avg, docsPerSec: tps, success };
+  global.gc && global.gc();
+  const memAfter = process.memoryUsage();
+  const memDelta = {
+    rss: memAfter.rss - memBefore.rss,
+    heapUsed: memAfter.heapUsed - memBefore.heapUsed,
+    external: memAfter.external - memBefore.external,
+  };
+  console.log(
+    `[bench] ${name}: ${iterations} iters in ${ms.toFixed(1)}ms | avg ${avg.toFixed(3)}ms | ${tps.toFixed(1)} docs/s | success ${success}/${iterations} | heapΔ ${(memDelta.heapUsed/1024).toFixed(1)} KiB`
+  );
+  return { name, iterations, ms, avgMs: avg, docsPerSec: tps, success, memDelta };
 }
 
 async function main() {
   const Parser = await loadParser();
   const iterations = Number(process.env.BENCH_ITERS || 2000);
-  console.log(`[bench] Using dist/esm/index.js, iterations=${iterations}`);
+  console.log(`[bench] Using dist/esm/index.js, iterations=${iterations}${global.gc ? ' (GC enabled)' : ''}`);
   const results = [];
   results.push(await runCase('small-valid', smallDoc(), iterations, Parser));
   results.push(await runCase('malformed-recovery', malformedDoc(), iterations, Parser));

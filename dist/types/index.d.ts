@@ -26,6 +26,7 @@ export declare class LuciformXMLParser {
     private mode;
     private maxRecoveries?;
     private recoveryStopIssued;
+    private coalesceTextNodes;
     constructor(content: string, options?: ParserOptions);
     /**
      * Parse le XML avec mode Luciform-permissif
