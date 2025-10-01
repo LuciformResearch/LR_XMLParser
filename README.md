@@ -1,4 +1,31 @@
-# LuciformXMLParser - Architecture Modulaire
+# 🦊 LR XMLParser™ - Parser XML Modulaire
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Performance](https://img.shields.io/badge/Performance-2x%20faster-green)](https://github.com/LuciformResearch/LR_XMLParser)
+
+Parser XML haute performance avec architecture modulaire. Créé par **Lucie Defraiteur**.
+
+## 📝 Licence
+
+Ce projet est sous **licence MIT avec clause d'attribution renforcée**. 
+
+### ✅ **Autorisé** :
+- Utiliser le code comme référence/inspiration
+- Copier des parties du code avec attribution
+- Modifier et adapter des composants
+- Utiliser dans des projets personnels/commerciaux
+
+### ❌ **Interdit** :
+- Copier le projet entier sans attribution
+- Prétendre être l'auteur original
+- Supprimer les mentions de copyright
+
+### 📋 **Attribution obligatoire** :
+- "Basé sur LR XMLParser™ par Lucie Defraiteur"
+- Lien vers le projet original
+- Conservation des mentions de copyright
+
+Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
 ## 🎯 Vue d'ensemble
 
@@ -194,6 +221,36 @@ const allElements = document.findAllElements('item');
 - ✅ Récupération d'erreurs rapide
 
 ---
+
+## 👩‍💻 Auteur
+
+**Lucie Defraiteur**
+- 📧 Email : luciedefraiteur@gmail.com
+- 🦊 GitLab : [@luciformresearch](https://gitlab.com/luciformresearch)
+- 🌐 Site : [luciformresearch.com](https://luciformresearch.com)
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à :
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Merge Request
+
+## 📞 Support
+
+Pour toute question ou problème :
+- 🐛 **Bugs** : Ouvrir une issue sur GitLab
+- 💡 **Suggestions** : Créer une discussion
+- 📧 **Contact** : luciedefraiteur@gmail.com
+
+---
+
+<div align="center">
+  <p>Fait avec ❤️ par <strong>Lucie Defraiteur</strong></p>
+  <p>🦊 <a href="https://gitlab.com/luciformresearch">GitLab</a> | 🌐 <a href="https://luciformresearch.com">Site Web</a></p>
+</div>
 
 **Status**: ✅ **Refactorisation complète et validée**  
 **Performance**: 🚀 **2x plus rapide**  
