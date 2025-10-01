@@ -64,6 +64,45 @@ Architecture modulaire (scanner → parser → modèles → diagnostics) pensée
 - 0.2.1
   - Plafond de récupération: arrêt de l’analyse au‑delà de `maxRecoveries`; diagnostics de synthèse; document partiel.
 
+## Réponses structurées LLM
+
+- Recette « permissif sécurisé »:
+
+  ```ts
+  import { LuciformXMLParser } from '@luciformresearch/xmlparser';
+
+  const parser = new LuciformXMLParser(xml, {
+    mode: 'luciform-permissive',
+    maxRecoveries: 20,
+    maxDepth: 100,
+    maxTextLength: 200_000,
+    maxPILength: 2_000,
+    maxCommentLength: 20_000,
+    coalesceTextNodes: true,
+  });
+  const res = parser.parse();
+  if (!res.success) {
+    console.warn('Diagnostics:', res.diagnostics);
+  }
+  const value = res.document?.findElement('answer')?.getTextContent();
+  ```
+
+- Extraction sensible aux namespaces (balises LLM préfixées):
+
+  ```ts
+  // <root xmlns:slot="urn:slots"><slot:item>42</slot:item></root>
+  const item = res.document?.findByNS('urn:slots', 'item')?.getTextContent();
+  ```
+
+## Posture de sécurité en production
+
+- Limites: `maxDepth`, `maxTextLength`, `maxPILength`, `maxCommentLength`, nombre/longueur des attributs.
+- Garde de récupération: plafonne les corrections via `maxRecoveries`; arrête l’analyse avec diagnostics de synthèse.
+- Namespaces: préfixes réservés (`xmlns`, URI de `xml`), diagnostics de préfixe non lié; le ns par défaut ne s’applique pas aux attributs.
+- DOCTYPE: extrait root/public/system; aucun fetch externe; DTD désactivé par défaut.
+- Entités: garde contre l’expansion; aucun I/O réseau.
+- Diagnostics: codes/messages/suggestions structurés avec positions (audit).
+
 ### Usages clés
 
 - Réponses LLM structurées (mode « luciform‑permissive » tolérant et récupérant les erreurs).
@@ -146,6 +185,15 @@ new LuciformSAX(xml, {
 }).run();
 ```
 
+Handlers SAX disponibles:
+- `onStartElement(name, attrs)`
+- `onEndElement(name)`
+- `onText(text)`
+- `onComment(text, closed)`
+- `onCDATA(text, closed)`
+- `onPI(content, closed)`
+- `onDoctype(content)`
+
 ## Namespaces
 
 - Le namespace par défaut s’applique aux éléments, pas aux attributs.
@@ -185,6 +233,8 @@ Validé en interne sur:
 - Affiche le débit et la latence moyenne pour plusieurs corpus, ainsi que les deltas mémoire (si GC activé).
 - Écrit des rapports JSON dans `Reports/Benchmarks/`. Voir `docs/BENCHMARKS.md` pour les détails.
 
+Astuce: exécuter avec `node --expose-gc` pour activer les métriques mémoire.
+
 ## Gestion des erreurs
 
 - Consultez `result.diagnostics` pour des problèmes structurés (code, message, suggestion, position).
@@ -201,6 +251,29 @@ Validé en interne sur:
     - GitLab: https://gitlab.com/luciformresearch/lr_hmm
     - GitHub: https://github.com/LuciformResearch/LR_HMM
   - LR Hub (socle): https://gitlab.com/luciformresearch/lr_chat
+
+## Exemples d’intégration
+
+- Parsing strict (échec immédiat):
+
+  ```ts
+  const strict = new LuciformXMLParser(xml, { mode: 'strict' }).parse();
+  if (!strict.success) throw new Error('Invalid XML');
+  ```
+
+- Permissif avec filtrage de diagnostics:
+
+  ```ts
+  const res = new LuciformXMLParser(xml, { mode: 'luciform-permissive', maxRecoveries: 10 }).parse();
+  const fatals = res.diagnostics.filter(d => d.level === 'error');
+  const nonFatals = res.diagnostics.filter(d => d.level !== 'error');
+  ```
+
+- Sous‑chemins pour modèles:
+
+  ```ts
+  import { XMLDocument, XMLElement } from '@luciformresearch/xmlparser/document';
+  ```
 
 ## Contribution
 

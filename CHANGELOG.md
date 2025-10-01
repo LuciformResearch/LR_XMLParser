@@ -48,3 +48,5 @@ All notable changes to this project will be documented in this file.
   - Add `coalesceTextNodes` parser option (default true) to merge adjacent text nodes.
   - Benchmarks: add memory metrics (heap delta) and show GC mode; JSON report enriched.
   - Add SAX unit tests for PI and DOCTYPE events.
+- 0.2.4
+  - Docs: refreshed README (EN/FR) with LLM-focused examples, security posture, SAX quickstart and handlers, integration recipes, and What's New section.
