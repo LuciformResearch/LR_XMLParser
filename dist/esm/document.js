@@ -26,7 +26,7 @@ export class XMLNode {
     findChild(name) {
         if (!this.children)
             return undefined;
-        return this.children.find(child => child.type === 'element' && child.name === name);
+        return this.children.find((child) => child.type === 'element' && child.name === name);
     }
     /**
      * Trouve tous les enfants par nom (pour les éléments)
@@ -34,7 +34,7 @@ export class XMLNode {
     findAllChildren(name) {
         if (!this.children)
             return [];
-        return this.children.filter(child => child.type === 'element' && child.name === name);
+        return this.children.filter((child) => child.type === 'element' && child.name === name);
     }
     /**
      * Obtient le texte de tous les enfants de type text
@@ -43,8 +43,8 @@ export class XMLNode {
         if (!this.children)
             return '';
         return this.children
-            .filter(child => child.type === 'text')
-            .map(child => child.content || '')
+            .filter((child) => child.type === 'text')
+            .map((child) => child.content || '')
             .join('');
     }
 }

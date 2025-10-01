@@ -4,7 +4,7 @@
  * Fournit une interface de compatibilité pour migrer progressivement
  * de l'ancien parser vers la nouvelle architecture modulaire
  */
-import { LuciformXMLParser } from './index';
+import { LuciformXMLParser } from './index.js';
 /**
  * Interface de compatibilité avec l'ancien parser
  *
@@ -61,28 +61,28 @@ export function migrateToNewParser() {
     // Instructions de migration
     const migrationSteps = [
         '1. Remplacer les imports:',
-        '   Ancien: import { LuciformXMLParser } from "./llm/LuciformXMLParser"',
-        '   Nouveau: import { LuciformXMLParser } from "./xml-parser/index"',
+        '   Ancien: import { LuciformXMLParser } from "./llm/LuciformXMLParser.js"',
+        '   Nouveau: import { LuciformXMLParser } from "./xml-parser/index.js"',
         '',
         '2. Ou utiliser la compatibilité:',
-        '   import { LuciformXMLParserCompat } from "./xml-parser/migration"',
+        '   import { LuciformXMLParserCompat } from "./xml-parser/migration.js"',
         '',
-        '3. L\'API reste identique, pas de changement de code nécessaire',
+        "3. L'API reste identique, pas de changement de code nécessaire",
         '',
         '4. Avantages de la migration:',
         '   - Modules plus petits et maintenables',
         '   - Tests unitaires par module',
         '   - Meilleure séparation des responsabilités',
-        '   - Performance améliorée (2x plus rapide)'
+        '   - Performance améliorée (2x plus rapide)',
     ];
-    migrationSteps.forEach(step => console.log(step));
+    migrationSteps.forEach((step) => console.log(step));
     return migrationSteps;
 }
 /**
  * Test de compatibilité
  */
 export function testCompatibility() {
-    console.log('🧪 Test de compatibilité avec l\'ancien parser...');
+    console.log("🧪 Test de compatibilité avec l'ancien parser...");
     const testXML = `
 <root>
   <child attribute="value">Contenu</child>

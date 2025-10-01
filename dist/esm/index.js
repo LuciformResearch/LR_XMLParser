@@ -11,10 +11,10 @@
  *
  * Architecture modulaire refactorisée pour une meilleure maintenabilité
  */
-import { LuciformXMLScanner } from './scanner';
-import { XMLDocument, XMLElement, XMLDeclaration, XMLDoctype } from './document';
-import { DiagnosticManager, XML_ERROR_CODES } from './diagnostics';
-import { XMLNode } from './document';
+import { LuciformXMLScanner } from './scanner.js';
+import { XMLDocument, XMLElement, XMLDeclaration, XMLDoctype } from './document.js';
+import { DiagnosticManager, XML_ERROR_CODES } from './diagnostics.js';
+import { XMLNode } from './document.js';
 export class LuciformXMLParser {
     constructor(content, options = {}) {
         this.content = content;
@@ -53,7 +53,7 @@ export class LuciformXMLParser {
             errors,
             diagnostics,
             recoveryCount,
-            nodeCount
+            nodeCount,
         };
     }
     /**
@@ -64,7 +64,7 @@ export class LuciformXMLParser {
         let token;
         while ((token = scanner.next()) !== null) {
             switch (token.type) {
-                case 'PI':
+                case 'PI': {
                     if (token.content?.startsWith('xml')) {
                         const declaration = this.parseDeclaration(token, diagnostics);
                         if (declaration) {
@@ -76,29 +76,35 @@ export class LuciformXMLParser {
                         this.addProcessingInstruction(document, token, diagnostics);
                     }
                     break;
-                case 'Doctype':
+                }
+                case 'Doctype': {
                     const doctype = this.parseDoctype(token, diagnostics);
                     if (doctype) {
                         document.doctype = doctype;
                     }
                     break;
-                case 'StartTag':
+                }
+                case 'StartTag': {
                     const element = this.parseElement(scanner, token, diagnostics, 0);
                     if (element) {
                         document.addChild(element);
                     }
                     break;
-                case 'Text':
+                }
+                case 'Text': {
                     if (token.content?.trim()) {
                         this.addTextNode(document, token, diagnostics);
                     }
                     break;
-                case 'Comment':
+                }
+                case 'Comment': {
                     this.addCommentNode(document, token, diagnostics);
                     break;
-                case 'CDATA':
+                }
+                case 'CDATA': {
                     this.addCDATANode(document, token, diagnostics);
                     break;
+                }
             }
         }
         return document;
@@ -106,7 +112,7 @@ export class LuciformXMLParser {
     /**
      * Parse une déclaration XML
      */
-    parseDeclaration(token, diagnostics) {
+    parseDeclaration(token, _diagnostics) {
         const content = token.content || '';
         const parts = content.split(/\s+/);
         let version;
@@ -129,7 +135,7 @@ export class LuciformXMLParser {
     /**
      * Parse une déclaration DOCTYPE
      */
-    parseDoctype(token, diagnostics) {
+    parseDoctype(token, _diagnostics) {
         const content = token.content || '';
         const parts = content.split(/\s+/);
         const name = parts[0];
@@ -169,13 +175,14 @@ export class LuciformXMLParser {
         let token;
         while ((token = scanner.next()) !== null) {
             switch (token.type) {
-                case 'StartTag':
+                case 'StartTag': {
                     const childElement = this.parseElement(scanner, token, diagnostics, depth + 1);
                     if (childElement) {
                         element.addChild(childElement);
                     }
                     break;
-                case 'EndTag':
+                }
+                case 'EndTag': {
                     if (token.tagName === element.name) {
                         element.closed = true;
                         return element;
@@ -185,18 +192,22 @@ export class LuciformXMLParser {
                         diagnostics.incrementRecovery();
                     }
                     break;
-                case 'Text':
+                }
+                case 'Text': {
                     if (token.content?.trim()) {
                         const textNode = new XMLNode('text', token.content, token.location);
                         element.addChild(textNode);
                     }
                     break;
-                case 'Comment':
+                }
+                case 'Comment': {
                     this.addCommentNode(element, token, diagnostics);
                     break;
-                case 'CDATA':
+                }
+                case 'CDATA': {
                     this.addCDATANode(element, token, diagnostics);
                     break;
+                }
             }
         }
         // Balise non fermée
@@ -256,7 +267,7 @@ export class LuciformXMLParser {
             return;
         }
         if (!token.closed) {
-            diagnostics.addWarning(XML_ERROR_CODES.INVALID_PI, 'Instruction de traitement non fermée correctement', token.location, 'Utilisez ?> pour fermer l\'instruction');
+            diagnostics.addWarning(XML_ERROR_CODES.INVALID_PI, 'Instruction de traitement non fermée correctement', token.location, "Utilisez ?> pour fermer l'instruction");
             diagnostics.incrementRecovery();
         }
         const piNode = new XMLNode('pi', content, token.location);
@@ -282,6 +293,6 @@ export class LuciformXMLParser {
     }
 }
 // Réexporter les classes/utilitaires principaux (éviter les conflits de noms avec ./types)
-export * from './scanner';
-export * from './document';
-export * from './diagnostics';
+export * from './scanner.js';
+export * from './document.js';
+export * from './diagnostics.js';

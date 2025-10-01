@@ -1,6 +1,6 @@
 /**
  * LuciformXMLScanner - Scanner XML robuste
- * 
+ *
  * Tokenizer à états pour parser XML avec gestion des erreurs
  * et mode permissif pour récupération d'erreurs
  */
@@ -61,7 +61,7 @@ export class LuciformXMLScanner {
       if (char === '<') {
         // Vérifier si c'est le début d'une section spéciale
         const nextChars = this.content.substring(this.position, this.position + 9);
-        
+
         if (nextChars.startsWith('<!--')) {
           this.state = 'Comment';
           break;
@@ -90,7 +90,7 @@ export class LuciformXMLScanner {
     return {
       type: 'Text',
       content,
-      location: startLocation
+      location: startLocation,
     };
   }
 
@@ -107,15 +107,16 @@ export class LuciformXMLScanner {
         location: startLocation,
         tagName: '',
         attributes: new Map(),
-        invalidAttributes: ['empty-tag-name']
+        invalidAttributes: ['empty-tag-name'],
       };
     }
 
     // Lire les attributs
     const attributes = this.readAttributes();
-    
+
     // Vérifier si c'est auto-fermant
-    const selfClosing = this.content[this.position] === '/' && this.content[this.position + 1] === '>';
+    const selfClosing =
+      this.content[this.position] === '/' && this.content[this.position + 1] === '>';
     if (selfClosing) {
       this.advance(); // Skip '/'
     }
@@ -133,7 +134,7 @@ export class LuciformXMLScanner {
       location: startLocation,
       tagName,
       attributes,
-      selfClosing
+      selfClosing,
     };
   }
 
@@ -143,7 +144,7 @@ export class LuciformXMLScanner {
     this.advance(); // Skip '/'
 
     const tagName = this.readTagName();
-    
+
     // Skip '>'
     while (this.position < this.content.length && this.content[this.position] !== '>') {
       this.advance();
@@ -158,7 +159,7 @@ export class LuciformXMLScanner {
       type: 'EndTag',
       content: this.content.substring(startLocation.position, this.position),
       location: startLocation,
-      tagName: tagName || ''
+      tagName: tagName || '',
     };
   }
 
@@ -173,9 +174,11 @@ export class LuciformXMLScanner {
     let closed = false;
 
     while (this.position < this.content.length - 2) {
-      if (this.content[this.position] === '-' && 
-          this.content[this.position + 1] === '-' && 
-          this.content[this.position + 2] === '>') {
+      if (
+        this.content[this.position] === '-' &&
+        this.content[this.position + 1] === '-' &&
+        this.content[this.position + 2] === '>'
+      ) {
         closed = true;
         this.advance(); // Skip '-'
         this.advance(); // Skip '-'
@@ -191,7 +194,7 @@ export class LuciformXMLScanner {
       type: 'Comment',
       content: this.content.substring(start, this.position - (closed ? 3 : 0)),
       location: startLocation,
-      closed
+      closed,
     };
   }
 
@@ -219,7 +222,7 @@ export class LuciformXMLScanner {
       type: 'PI',
       content: this.content.substring(start, this.position - (closed ? 2 : 0)),
       location: startLocation,
-      closed
+      closed,
     };
   }
 
@@ -239,9 +242,11 @@ export class LuciformXMLScanner {
     let closed = false;
 
     while (this.position < this.content.length - 2) {
-      if (this.content[this.position] === ']' && 
-          this.content[this.position + 1] === ']' && 
-          this.content[this.position + 2] === '>') {
+      if (
+        this.content[this.position] === ']' &&
+        this.content[this.position + 1] === ']' &&
+        this.content[this.position + 2] === '>'
+      ) {
         closed = true;
         this.advance(); // Skip ']'
         this.advance(); // Skip ']'
@@ -257,7 +262,7 @@ export class LuciformXMLScanner {
       type: 'CDATA',
       content: this.content.substring(start, this.position - (closed ? 3 : 0)),
       location: startLocation,
-      closed
+      closed,
     };
   }
 
@@ -284,92 +289,106 @@ export class LuciformXMLScanner {
       type: 'Doctype',
       content: this.content.substring(start, this.position - (closed ? 1 : 0)),
       location: startLocation,
-      closed
+      closed,
     };
   }
 
   private readTagName(): string {
     const start = this.position;
-    
+
     while (this.position < this.content.length) {
       const char = this.content[this.position];
-      
-      if (char === ' ' || char === '\t' || char === '\n' || char === '\r' || 
-          char === '/' || char === '>') {
+
+      if (
+        char === ' ' ||
+        char === '\t' ||
+        char === '\n' ||
+        char === '\r' ||
+        char === '/' ||
+        char === '>'
+      ) {
         break;
       }
-      
+
       this.advance();
     }
-    
+
     return this.content.substring(start, this.position);
   }
 
   private readAttributes(): Map<string, string> {
     const attributes = new Map<string, string>();
-    
+
     // Skip whitespace
-    while (this.position < this.content.length && 
-           /\s/.test(this.content[this.position])) {
+    while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
       this.advance();
     }
-    
-    while (this.position < this.content.length && 
-           this.content[this.position] !== '>' && 
-           this.content[this.position] !== '/') {
-      
+
+    while (
+      this.position < this.content.length &&
+      this.content[this.position] !== '>' &&
+      this.content[this.position] !== '/'
+    ) {
       const attrName = this.readAttributeName();
       if (!attrName) break;
-      
+
       // Skip whitespace and '='
-      while (this.position < this.content.length && 
-             (/\s/.test(this.content[this.position]) || this.content[this.position] === '=')) {
+      while (
+        this.position < this.content.length &&
+        (/\s/.test(this.content[this.position]) || this.content[this.position] === '=')
+      ) {
         this.advance();
       }
-      
+
       const attrValue = this.readAttributeValue();
       if (attrValue !== null) {
         attributes.set(attrName, attrValue);
       }
-      
+
       // Skip whitespace
-      while (this.position < this.content.length && 
-             /\s/.test(this.content[this.position])) {
+      while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
         this.advance();
       }
     }
-    
+
     return attributes;
   }
 
   private readAttributeName(): string {
     const start = this.position;
-    
+
     while (this.position < this.content.length) {
       const char = this.content[this.position];
-      
-      if (char === ' ' || char === '\t' || char === '\n' || char === '\r' || 
-          char === '=' || char === '>' || char === '/') {
+
+      if (
+        char === ' ' ||
+        char === '\t' ||
+        char === '\n' ||
+        char === '\r' ||
+        char === '=' ||
+        char === '>' ||
+        char === '/'
+      ) {
         break;
       }
-      
+
       this.advance();
     }
-    
+
     return this.content.substring(start, this.position);
   }
 
   private readAttributeValue(): string | null {
     if (this.position >= this.content.length) return null;
-    
+
     const char = this.content[this.position];
     if (char !== '"' && char !== "'") return null;
-    
+
     const quote = char;
     this.advance(); // Skip opening quote
-    
+
     const start = this.position;
-    
+
     while (this.position < this.content.length) {
       if (this.content[this.position] === quote) {
         this.advance(); // Skip closing quote
@@ -377,7 +396,7 @@ export class LuciformXMLScanner {
       }
       this.advance();
     }
-    
+
     return this.content.substring(start, this.position - 1);
   }
 
@@ -397,7 +416,7 @@ export class LuciformXMLScanner {
     return {
       line: this.line,
       column: this.column,
-      position: this.position
+      position: this.position,
     };
   }
 

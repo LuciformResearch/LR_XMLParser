@@ -10,6 +10,26 @@ Projet mené par LuciformResearch (Lucie Defraiteur).
 
 — English: see README.md
 
+## Démarrage (npm)
+
+- Installation:
+  - `npm install @luciformresearch/xmlparser`
+  - `pnpm add @luciformresearch/xmlparser`
+
+- Exemples (ESM et CommonJS):
+  ```ts
+  // ESM
+  import { LuciformXMLParser } from '@luciformresearch/xmlparser';
+  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+  ```
+  ```js
+  // CommonJS
+  const { LuciformXMLParser } = require('@luciformresearch/xmlparser');
+  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+  ```
+
+- Subpath exports (optionnels): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.
+
 ## Aperçu
 
 Architecture modulaire (scanner → parser → modèles → diagnostics) pensée pour la lisibilité, la testabilité et la performance.
@@ -21,6 +41,7 @@ Architecture modulaire (scanner → parser → modèles → diagnostics) pensée
 - Intégration dans des pipelines IA (LR HMM) et des systèmes plus larges (LR Hub).
 
 Exemple d’usage dans un moteur de mémoire hiérarchique:
+
 ```ts
 const parser = new LuciformXMLParser(xml, {
   mode: 'luciform-permissive',
@@ -53,6 +74,15 @@ lr_xmlparser/
 - Réutilisabilité: scanner autonome, diagnostics extensibles, modèles indépendants.
 - Orienté LLM: mode permissif, récupération d’erreurs, gestion CDATA, tolérance de format.
 
+## Cas limites couverts
+
+- Attributs et balises auto-fermantes (`<child a="1" b="two"/>`)
+- Commentaires/CDATA non fermés: récupération + diagnostics en mode permissif
+- Balises non appariées: erreurs avec codes et positions
+- Limites: `maxDepth`, `maxTextLength`, `maxPILength`
+- Instructions de traitement (PI) et DOCTYPE
+- BOM + tolérance aux espaces
+
 ## API express
 
 ```ts
@@ -71,11 +101,18 @@ npx tsx test-integration.ts
 ```
 
 Validé en interne sur:
+
 - XML simple valide
 - XML malformé (mode permissif)
 - XML complexe avec CDATA et commentaires
 - Performance et limites
 - Compatibilité d’API (couche de compatibilité disponible)
+
+## Gestion des erreurs
+
+- Consultez `result.diagnostics` pour des problèmes structurés (code, message, suggestion, position).
+- `result.success` est `false` en cas d’erreurs; en mode permissif, `document` peut rester exploitable.
+- Codes typiques: `UNCLOSED_TAG`, `MISMATCHED_TAG`, `INVALID_COMMENT`, `INVALID_CDATA`, `MAX_DEPTH_EXCEEDED`, `MAX_TEXT_LENGTH_EXCEEDED`.
 
 ## Liens et intégrations
 
@@ -90,6 +127,7 @@ Validé en interne sur:
 ## Contribution
 
 Contributions bienvenues.
+
 - Fork → branche feature → MR/PR
 - Modules focalisés; évitez les dépendances inutiles
 - Ajoutez des tests pour les modules impactés
@@ -98,27 +136,6 @@ Contributions bienvenues.
 
 - Bugs: issues sur GitLab
 - Questions: discussions GitLab ou contact direct
-- Contact: luciedefraiteur@gmail.com
+- Contact: luciedefraiteur@luciformresearch.com
 
 —
-
-## Démarrage (npm)
-
-- Installation:
-  - `npm install @luciformresearch/xmlparser`
-  - `pnpm add @luciformresearch/xmlparser`
-
-- Exemples (ESM et CommonJS):
-  ```ts
-  // ESM
-  import { LuciformXMLParser } from '@luciformresearch/xmlparser';
-  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
-  ```
-  ```js
-  // CommonJS
-  const { LuciformXMLParser } = require('@luciformresearch/xmlparser');
-  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
-  ```
-
-- Subpath exports (optionnels): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.
-

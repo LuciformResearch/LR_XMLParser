@@ -1,9 +1,9 @@
 {
   "name": "@luciformresearch/xmlparser",
-  "version": "0.1.1",
+  "version": "0.1.6",
   "description": "High-performance XML parser for LLM workflows and general XML with robust diagnostics and permissive mode.",
   "license": "MIT",
-  "author": "Lucie Defraiteur <luciedefraiteur@gmail.com>",
+  "author": "Lucie Defraiteur <luciedefraiteur@luciformresearch.com>",
   "repository": {
     "type": "git",
     "url": "git+https://gitlab.com/luciformresearch/lr_xmlparser.git"
@@ -13,30 +13,43 @@
   },
   "homepage": "https://gitlab.com/luciformresearch/lr_xmlparser#readme",
   "type": "module",
-  "main": "./dist/cjs/index.cjs",
+  "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
+  "keywords": [
+    "xml",
+    "xml-parser",
+    "parser",
+    "typescript",
+    "llm",
+    "diagnostics",
+    "cdata",
+    "sax",
+    "secure",
+    "esm",
+    "cjs"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.cjs",
+      "require": "./dist/cjs/index.js",
       "default": "./dist/esm/index.js"
     },
     "./scanner": {
       "types": "./dist/types/scanner.d.ts",
       "import": "./dist/esm/scanner.js",
-      "require": "./dist/cjs/scanner.cjs"
+      "require": "./dist/cjs/scanner.js"
     },
     "./document": {
       "types": "./dist/types/document.d.ts",
       "import": "./dist/esm/document.js",
-      "require": "./dist/cjs/document.cjs"
+      "require": "./dist/cjs/document.js"
     },
     "./diagnostics": {
       "types": "./dist/types/diagnostics.d.ts",
       "import": "./dist/esm/diagnostics.js",
-      "require": "./dist/cjs/diagnostics.cjs"
+      "require": "./dist/cjs/diagnostics.js"
     },
     "./types": {
       "types": "./dist/types/types.d.ts",
@@ -45,7 +58,7 @@
     "./migration": {
       "types": "./dist/types/migration.d.ts",
       "import": "./dist/esm/migration.js",
-      "require": "./dist/cjs/migration.cjs"
+      "require": "./dist/cjs/migration.js"
     }
   },
   "sideEffects": false,
@@ -57,18 +70,27 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json && node scripts/rename-cjs.mjs",
+    "build:esm": "tsc -p tsconfig.esm.json && node scripts/fix-esm-extensions.mjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node scripts/write-cjs-type.mjs",
     "build:types": "tsc -p tsconfig.types.json",
     "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:types",
-    "prepare": "npm run build",
-    "test": "node dist/cjs/test-integration.cjs || echo 'Run build first'",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:ci": "vitest run --coverage --reporter=default",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "format": "prettier -w .",
     "release": "npm version patch && git tag v$npm_package_version"
   },
   "engines": {
     "node": ">=18"
   },
   "devDependencies": {
-    "typescript": "^5.5.0"
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "c8": "^9.1.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
   }
 }

@@ -1,6 +1,6 @@
 /**
  * LuciformXMLParser - Parser XML de niveau recherche (Refactorisé)
- * 
+ *
  * Marque de fabrique Luciform Research :
  * - Tokenizer à états robuste
  * - Parser SAX avec mode permissif
@@ -8,19 +8,14 @@
  * - Sécurité anti-DoS/XXE
  * - Diagnostics précis (ligne/colonne)
  * - Mode "Luciform-permissif" pour récupération d'erreurs
- * 
+ *
  * Architecture modulaire refactorisée pour une meilleure maintenabilité
  */
 
 import { LuciformXMLScanner } from './scanner';
 import { XMLDocument, XMLElement, XMLDeclaration, XMLDoctype } from './document';
 import { DiagnosticManager, XML_ERROR_CODES } from './diagnostics';
-import { 
-  ParseResult, 
-  ParserOptions, 
-  Token, 
-  Location
-} from './types';
+import { ParseResult, ParserOptions, Token } from './types';
 import { XMLNode } from './document';
 
 export class LuciformXMLParser {
@@ -81,7 +76,7 @@ export class LuciformXMLParser {
       errors,
       diagnostics,
       recoveryCount,
-      nodeCount
+      nodeCount,
     };
   }
 
@@ -94,7 +89,7 @@ export class LuciformXMLParser {
 
     while ((token = scanner.next()) !== null) {
       switch (token.type) {
-        case 'PI':
+        case 'PI': {
           if (token.content?.startsWith('xml')) {
             const declaration = this.parseDeclaration(token, diagnostics);
             if (declaration) {
@@ -105,34 +100,40 @@ export class LuciformXMLParser {
             this.addProcessingInstruction(document, token, diagnostics);
           }
           break;
+        }
 
-        case 'Doctype':
+        case 'Doctype': {
           const doctype = this.parseDoctype(token, diagnostics);
           if (doctype) {
             document.doctype = doctype;
           }
           break;
+        }
 
-        case 'StartTag':
+        case 'StartTag': {
           const element = this.parseElement(scanner, token, diagnostics, 0);
           if (element) {
             document.addChild(element);
           }
           break;
+        }
 
-        case 'Text':
+        case 'Text': {
           if (token.content?.trim()) {
             this.addTextNode(document, token, diagnostics);
           }
           break;
+        }
 
-        case 'Comment':
+        case 'Comment': {
           this.addCommentNode(document, token, diagnostics);
           break;
+        }
 
-        case 'CDATA':
+        case 'CDATA': {
           this.addCDATANode(document, token, diagnostics);
           break;
+        }
       }
     }
 
@@ -142,17 +143,17 @@ export class LuciformXMLParser {
   /**
    * Parse une déclaration XML
    */
-  private parseDeclaration(token: Token, diagnostics: DiagnosticManager): XMLDeclaration | null {
+  private parseDeclaration(token: Token, _diagnostics: DiagnosticManager): XMLDeclaration | null {
     const content = token.content || '';
     const parts = content.split(/\s+/);
-    
+
     let version: string | undefined;
     let encoding: string | undefined;
     let standalone: boolean | undefined;
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      
+
       if (part === 'version' && i + 1 < parts.length) {
         version = parts[i + 1].replace(/['"]/g, '');
       } else if (part === 'encoding' && i + 1 < parts.length) {
@@ -168,17 +169,17 @@ export class LuciformXMLParser {
   /**
    * Parse une déclaration DOCTYPE
    */
-  private parseDoctype(token: Token, diagnostics: DiagnosticManager): XMLDoctype | null {
+  private parseDoctype(token: Token, _diagnostics: DiagnosticManager): XMLDoctype | null {
     const content = token.content || '';
     const parts = content.split(/\s+/);
-    
+
     const name = parts[0];
     let publicId: string | undefined;
     let systemId: string | undefined;
 
     for (let i = 1; i < parts.length; i++) {
       const part = parts[i];
-      
+
       if (part === 'PUBLIC' && i + 1 < parts.length) {
         publicId = parts[i + 1].replace(/['"]/g, '');
       } else if (part === 'SYSTEM' && i + 1 < parts.length) {
@@ -193,9 +194,9 @@ export class LuciformXMLParser {
    * Parse un élément XML
    */
   private parseElement(
-    scanner: LuciformXMLScanner, 
-    startToken: Token, 
-    diagnostics: DiagnosticManager, 
+    scanner: LuciformXMLScanner,
+    startToken: Token,
+    diagnostics: DiagnosticManager,
     depth: number
   ): XMLElement | null {
     if (depth > this.maxDepth) {
@@ -208,7 +209,7 @@ export class LuciformXMLParser {
     }
 
     const element = new XMLElement(startToken.tagName || '', startToken.location);
-    
+
     // Ajouter les attributs
     if (startToken.attributes) {
       for (const [name, value] of startToken.attributes) {
@@ -225,14 +226,15 @@ export class LuciformXMLParser {
     let token: Token | null;
     while ((token = scanner.next()) !== null) {
       switch (token.type) {
-        case 'StartTag':
+        case 'StartTag': {
           const childElement = this.parseElement(scanner, token, diagnostics, depth + 1);
           if (childElement) {
             element.addChild(childElement);
           }
           break;
+        }
 
-        case 'EndTag':
+        case 'EndTag': {
           if (token.tagName === element.name) {
             element.closed = true;
             return element;
@@ -246,21 +248,25 @@ export class LuciformXMLParser {
             diagnostics.incrementRecovery();
           }
           break;
+        }
 
-        case 'Text':
+        case 'Text': {
           if (token.content?.trim()) {
             const textNode = new XMLNode('text', token.content, token.location);
             element.addChild(textNode);
           }
           break;
+        }
 
-        case 'Comment':
+        case 'Comment': {
           this.addCommentNode(element, token, diagnostics);
           break;
+        }
 
-        case 'CDATA':
+        case 'CDATA': {
           this.addCDATANode(element, token, diagnostics);
           break;
+        }
       }
     }
 
@@ -281,9 +287,13 @@ export class LuciformXMLParser {
   /**
    * Ajoute un nœud de texte
    */
-  private addTextNode(parent: XMLDocument | XMLElement, token: Token, diagnostics: DiagnosticManager): void {
+  private addTextNode(
+    parent: XMLDocument | XMLElement,
+    token: Token,
+    diagnostics: DiagnosticManager
+  ): void {
     const content = token.content || '';
-    
+
     if (content.length > this.maxTextLength) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED,
@@ -300,9 +310,13 @@ export class LuciformXMLParser {
   /**
    * Ajoute un nœud de commentaire
    */
-  private addCommentNode(parent: XMLDocument | XMLElement, token: Token, diagnostics: DiagnosticManager): void {
+  private addCommentNode(
+    parent: XMLDocument | XMLElement,
+    token: Token,
+    diagnostics: DiagnosticManager
+  ): void {
     const content = token.content || '';
-    
+
     if (content.length > this.maxCommentLength) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED,
@@ -329,9 +343,13 @@ export class LuciformXMLParser {
   /**
    * Ajoute un nœud CDATA
    */
-  private addCDATANode(parent: XMLDocument | XMLElement, token: Token, diagnostics: DiagnosticManager): void {
+  private addCDATANode(
+    parent: XMLDocument | XMLElement,
+    token: Token,
+    diagnostics: DiagnosticManager
+  ): void {
     const content = token.content || '';
-    
+
     if (!token.closed) {
       diagnostics.addError(
         XML_ERROR_CODES.INVALID_CDATA,
@@ -349,9 +367,13 @@ export class LuciformXMLParser {
   /**
    * Ajoute une instruction de traitement
    */
-  private addProcessingInstruction(parent: XMLDocument, token: Token, diagnostics: DiagnosticManager): void {
+  private addProcessingInstruction(
+    parent: XMLDocument,
+    token: Token,
+    diagnostics: DiagnosticManager
+  ): void {
     const content = token.content || '';
-    
+
     if (content.length > this.maxPILength) {
       diagnostics.addError(
         XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED,
@@ -366,7 +388,7 @@ export class LuciformXMLParser {
         XML_ERROR_CODES.INVALID_PI,
         'Instruction de traitement non fermée correctement',
         token.location,
-        'Utilisez ?> pour fermer l\'instruction'
+        "Utilisez ?> pour fermer l'instruction"
       );
       diagnostics.incrementRecovery();
     }
@@ -380,7 +402,7 @@ export class LuciformXMLParser {
    */
   private countNodes(document: XMLDocument): number {
     let count = 0;
-    
+
     const countRecursive = (node: XMLNode) => {
       count++;
       if (node.children) {

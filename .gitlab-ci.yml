@@ -1,9 +1,10 @@
 stages:
   - build
+  - test
   - publish
 
 variables:
-  NODE_VERSION: "20"
+  NODE_VERSION: '20'
 
 build:package:
   stage: build
@@ -16,6 +17,15 @@ build:package:
     paths:
       - dist
     expire_in: 1 week
+
+test:node:
+  stage: test
+  image: node:${NODE_VERSION}
+  script:
+    - npm ci || npm i
+    - npm run build
+    - npm run lint
+    - npm run test:ci
 
 publish:npm:
   stage: publish
@@ -32,4 +42,3 @@ publish:npm:
   dependencies: []
   only:
     - tags
-

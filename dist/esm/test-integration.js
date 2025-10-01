@@ -5,10 +5,10 @@
  * Valide que tous les modules fonctionnent ensemble
  * et que la migration est transparente
  */
-import { LuciformXMLParser } from './index';
-import { LuciformXMLParserCompat } from './migration';
+import { LuciformXMLParser } from './index.js';
+import { LuciformXMLParserCompat } from './migration.js';
 async function testIntegration() {
-    console.log('🧪 Test d\'intégration - Parser XML refactorisé');
+    console.log("🧪 Test d'intégration - Parser XML refactorisé");
     console.log('==============================================\n');
     const testXML = `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -62,10 +62,10 @@ async function testIntegration() {
     console.log(`   Compatibilité: ${duration2}ms pour ${iterations} itérations`);
     console.log(`   Différence: ${Math.abs(duration1 - duration2)}ms`);
     // Résumé
-    console.log('\n📊 Résumé de l\'intégration:');
+    console.log("\n📊 Résumé de l'intégration:");
     console.log('=============================');
     console.log('✅ Architecture modulaire fonctionnelle');
-    console.log('✅ Compatibilité avec l\'ancien parser');
+    console.log("✅ Compatibilité avec l'ancien parser");
     console.log('✅ Performance maintenue');
     console.log('✅ API identique');
     console.log('✅ Migration transparente');

@@ -1,7 +1,11 @@
 # LR XMLParser — Modular, robust and safe XML parser
 
+[![npm](https://img.shields.io/npm/v/%40luciformresearch%2Fxmlparser)](https://www.npmjs.com/package/@luciformresearch/xmlparser)
+[![npm downloads](https://img.shields.io/npm/dm/%40luciformresearch%2Fxmlparser)](https://www.npmjs.com/package/@luciformresearch/xmlparser)
+[![types](https://img.shields.io/badge/types-included-blue)](./dist/types/index.d.ts)
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
-[![Benchmarks](https://img.shields.io/badge/Benchmarks-~2x%20faster-green)](./test-integration.ts)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-suite-green)](./test-integration.ts)
 [![Status](https://img.shields.io/badge/Status-Ready%20for%20LLM%20workflows-success)](#key-use-cases)
 
 High‑performance XML parser designed for modern AI pipelines. LR XMLParser is optimized for LLM‑generated XML (permissive mode with error recovery) while remaining strict, traceable, and secure for production workloads.
@@ -9,6 +13,28 @@ High‑performance XML parser designed for modern AI pipelines. LR XMLParser is 
 Project by LuciformResearch (Lucie Defraiteur).
 
 — Français: see README.fr.md
+
+## Getting started (npm)
+
+- Install:
+  - `npm install @luciformresearch/xmlparser`
+  - `pnpm add @luciformresearch/xmlparser`
+
+- Examples (ESM and CommonJS):
+
+  ```ts
+  // ESM
+  import { LuciformXMLParser } from '@luciformresearch/xmlparser';
+  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+  ```
+
+  ```js
+  // CommonJS
+  const { LuciformXMLParser } = require('@luciformresearch/xmlparser');
+  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+  ```
+
+- Subpath exports (optional): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.
 
 ## License
 
@@ -25,6 +51,7 @@ LR XMLParser follows a modular architecture (scanner → parser → models → d
 - Integration in AI pipelines (LR HMM) and larger systems (LR Hub).
 
 Example within a hierarchical memory engine:
+
 ```ts
 const parser = new LuciformXMLParser(xml, {
   mode: 'luciform-permissive',
@@ -57,6 +84,15 @@ lr_xmlparser/
 - Reusability: standalone scanner, extensible diagnostics, independent models.
 - LLM‑oriented: permissive mode, error recovery, CDATA handling, format tolerance.
 
+## Edge cases covered
+
+- Attributes and self-closing tags (`<child a="1" b="two"/>`)
+- Unclosed comments/CDATA: permissive mode recovers and logs diagnostics
+- Mismatched tags: errors with precise codes and locations
+- Limits: `maxDepth`, `maxTextLength`, `maxPILength`
+- Processing instructions and DOCTYPE handling
+- BOM + whitespace tolerance
+
 ## Express API
 
 ```ts
@@ -70,6 +106,12 @@ Options include security and performance limits (depth, text length, entity expa
 
 <!-- Migration notes removed to keep README product‑focused. Compatibility wrapper remains available via subpath export if needed. -->
 
+## Error handling
+
+- Inspect `result.diagnostics` for structured issues (code, message, suggestion, location).
+- `result.success` is false when errors are present; permissive mode may still return a usable `document`.
+- Typical codes: `UNCLOSED_TAG`, `MISMATCHED_TAG`, `INVALID_COMMENT`, `INVALID_CDATA`, `MAX_DEPTH_EXCEEDED`, `MAX_TEXT_LENGTH_EXCEEDED`.
+
 ## Testing and validation
 
 ```bash
@@ -77,6 +119,7 @@ npx tsx test-integration.ts
 ```
 
 Validated internally on:
+
 - Valid simple XML
 - Malformed XML (permissive mode)
 - Complex XML with CDATA and comments
@@ -96,6 +139,7 @@ Validated internally on:
 ## Contributing
 
 PRs welcome.
+
 - Fork → feature branch → MR/PR
 - Keep modules focused; avoid unnecessary deps
 - Add tests for affected modules
@@ -104,26 +148,6 @@ PRs welcome.
 
 - Issues: open on GitLab
 - Questions: GitLab discussions or direct contact
-- Contact: luciedefraiteur@gmail.com
+- Contact: luciedefraiteur@luciformresearch.com
 
 —
-
-## Getting started (npm)
-
-- Install:
-  - `npm install @luciformresearch/xmlparser`
-  - `pnpm add @luciformresearch/xmlparser`
-
-- Examples (ESM and CommonJS):
-  ```ts
-  // ESM
-  import { LuciformXMLParser } from '@luciformresearch/xmlparser';
-  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
-  ```
-  ```js
-  // CommonJS
-  const { LuciformXMLParser } = require('@luciformresearch/xmlparser');
-  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
-  ```
-
-- Subpath exports (optional): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.

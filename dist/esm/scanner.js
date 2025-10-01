@@ -83,7 +83,7 @@ export class LuciformXMLScanner {
         return {
             type: 'Text',
             content,
-            location: startLocation
+            location: startLocation,
         };
     }
     scanTag() {
@@ -98,7 +98,7 @@ export class LuciformXMLScanner {
                 location: startLocation,
                 tagName: '',
                 attributes: new Map(),
-                invalidAttributes: ['empty-tag-name']
+                invalidAttributes: ['empty-tag-name'],
             };
         }
         // Lire les attributs
@@ -119,7 +119,7 @@ export class LuciformXMLScanner {
             location: startLocation,
             tagName,
             attributes,
-            selfClosing
+            selfClosing,
         };
     }
     scanEndTag() {
@@ -139,7 +139,7 @@ export class LuciformXMLScanner {
             type: 'EndTag',
             content: this.content.substring(startLocation.position, this.position),
             location: startLocation,
-            tagName: tagName || ''
+            tagName: tagName || '',
         };
     }
     scanComment() {
@@ -167,7 +167,7 @@ export class LuciformXMLScanner {
             type: 'Comment',
             content: this.content.substring(start, this.position - (closed ? 3 : 0)),
             location: startLocation,
-            closed
+            closed,
         };
     }
     scanProcessingInstruction() {
@@ -190,7 +190,7 @@ export class LuciformXMLScanner {
             type: 'PI',
             content: this.content.substring(start, this.position - (closed ? 2 : 0)),
             location: startLocation,
-            closed
+            closed,
         };
     }
     scanCDATA() {
@@ -223,7 +223,7 @@ export class LuciformXMLScanner {
             type: 'CDATA',
             content: this.content.substring(start, this.position - (closed ? 3 : 0)),
             location: startLocation,
-            closed
+            closed,
         };
     }
     scanDoctype() {
@@ -245,15 +245,19 @@ export class LuciformXMLScanner {
             type: 'Doctype',
             content: this.content.substring(start, this.position - (closed ? 1 : 0)),
             location: startLocation,
-            closed
+            closed,
         };
     }
     readTagName() {
         const start = this.position;
         while (this.position < this.content.length) {
             const char = this.content[this.position];
-            if (char === ' ' || char === '\t' || char === '\n' || char === '\r' ||
-                char === '/' || char === '>') {
+            if (char === ' ' ||
+                char === '\t' ||
+                char === '\n' ||
+                char === '\r' ||
+                char === '/' ||
+                char === '>') {
                 break;
             }
             this.advance();
@@ -263,8 +267,7 @@ export class LuciformXMLScanner {
     readAttributes() {
         const attributes = new Map();
         // Skip whitespace
-        while (this.position < this.content.length &&
-            /\s/.test(this.content[this.position])) {
+        while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
             this.advance();
         }
         while (this.position < this.content.length &&
@@ -283,8 +286,7 @@ export class LuciformXMLScanner {
                 attributes.set(attrName, attrValue);
             }
             // Skip whitespace
-            while (this.position < this.content.length &&
-                /\s/.test(this.content[this.position])) {
+            while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
                 this.advance();
             }
         }
@@ -294,8 +296,13 @@ export class LuciformXMLScanner {
         const start = this.position;
         while (this.position < this.content.length) {
             const char = this.content[this.position];
-            if (char === ' ' || char === '\t' || char === '\n' || char === '\r' ||
-                char === '=' || char === '>' || char === '/') {
+            if (char === ' ' ||
+                char === '\t' ||
+                char === '\n' ||
+                char === '\r' ||
+                char === '=' ||
+                char === '>' ||
+                char === '/') {
                 break;
             }
             this.advance();
@@ -336,7 +343,7 @@ export class LuciformXMLScanner {
         return {
             line: this.line,
             column: this.column,
-            position: this.position
+            position: this.position,
         };
     }
     /**

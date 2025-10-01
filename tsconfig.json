@@ -12,12 +12,13 @@
     "resolveJsonModule": true,
     "isolatedModules": false
   },
-  "include": [
-    "*.ts"
-  ],
+  "include": ["*.ts"],
   "exclude": [
     "dist",
     "node_modules",
-    ".git"
+    ".git",
+    "tests",
+    "vitest.config.ts",
+    "tmp_npm_test"
   ]
 }

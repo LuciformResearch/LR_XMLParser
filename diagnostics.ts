@@ -1,6 +1,6 @@
 /**
  * Diagnostics - Gestion des erreurs et avertissements XML
- * 
+ *
  * Système de diagnostic pour le parser XML avec codes d'erreur
  * et suggestions de correction
  */
@@ -17,7 +17,7 @@ export class DiagnosticManager {
    */
   addDiagnostic(diagnostic: Diagnostic): void {
     this.diagnostics.push(diagnostic);
-    
+
     if (diagnostic.level === 'error') {
       this.errors.push(diagnostic);
     }
@@ -32,7 +32,7 @@ export class DiagnosticManager {
       code,
       message,
       location,
-      suggestion
+      suggestion,
     });
   }
 
@@ -45,7 +45,7 @@ export class DiagnosticManager {
       code,
       message,
       location,
-      suggestion
+      suggestion,
     });
   }
 
@@ -58,7 +58,7 @@ export class DiagnosticManager {
       code,
       message,
       location,
-      suggestion
+      suggestion,
     });
   }
 
@@ -87,14 +87,14 @@ export class DiagnosticManager {
    * Obtient les avertissements
    */
   getWarnings(): Diagnostic[] {
-    return this.diagnostics.filter(d => d.level === 'warn');
+    return this.diagnostics.filter((d) => d.level === 'warn');
   }
 
   /**
    * Obtient les infos
    */
   getInfos(): Diagnostic[] {
-    return this.diagnostics.filter(d => d.level === 'info');
+    return this.diagnostics.filter((d) => d.level === 'info');
   }
 
   /**
@@ -142,7 +142,7 @@ export class DiagnosticManager {
       errors: this.errors.length,
       warnings: this.getWarnings().length,
       infos: this.getInfos().length,
-      recoveries: this.recoveryCount
+      recoveries: this.recoveryCount,
     };
   }
 }
@@ -158,30 +158,30 @@ export const XML_ERROR_CODES = {
   MISMATCHED_TAG: 'MISMATCHED_TAG',
   DUPLICATE_ATTRIBUTE: 'DUPLICATE_ATTRIBUTE',
   INVALID_ATTRIBUTE: 'INVALID_ATTRIBUTE',
-  
+
   // Erreurs de structure
   MISSING_ROOT: 'MISSING_ROOT',
   MULTIPLE_ROOTS: 'MULTIPLE_ROOTS',
   INVALID_NESTING: 'INVALID_NESTING',
-  
+
   // Erreurs de contenu
   INVALID_CDATA: 'INVALID_CDATA',
   INVALID_COMMENT: 'INVALID_COMMENT',
   INVALID_PI: 'INVALID_PI',
   INVALID_DOCTYPE: 'INVALID_DOCTYPE',
-  
+
   // Erreurs de namespace
   INVALID_NAMESPACE: 'INVALID_NAMESPACE',
   UNDEFINED_PREFIX: 'UNDEFINED_PREFIX',
-  
+
   // Erreurs de sécurité
   ENTITY_EXPANSION_LIMIT: 'ENTITY_EXPANSION_LIMIT',
   MAX_DEPTH_EXCEEDED: 'MAX_DEPTH_EXCEEDED',
   MAX_TEXT_LENGTH_EXCEEDED: 'MAX_TEXT_LENGTH_EXCEEDED',
-  
+
   // Erreurs de récupération
   RECOVERY_ATTEMPTED: 'RECOVERY_ATTEMPTED',
-  PARTIAL_PARSE: 'PARTIAL_PARSE'
+  PARTIAL_PARSE: 'PARTIAL_PARSE',
 } as const;
 
 /**
@@ -203,35 +203,35 @@ export const XML_ERROR_MESSAGES = {
   [XML_ERROR_CODES.INVALID_DOCTYPE]: 'Déclaration DOCTYPE invalide',
   [XML_ERROR_CODES.INVALID_NAMESPACE]: 'Namespace invalide',
   [XML_ERROR_CODES.UNDEFINED_PREFIX]: 'Préfixe non défini',
-  [XML_ERROR_CODES.ENTITY_EXPANSION_LIMIT]: 'Limite d\'expansion d\'entité dépassée',
+  [XML_ERROR_CODES.ENTITY_EXPANSION_LIMIT]: "Limite d'expansion d'entité dépassée",
   [XML_ERROR_CODES.MAX_DEPTH_EXCEEDED]: 'Profondeur maximale dépassée',
   [XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED]: 'Longueur de texte maximale dépassée',
   [XML_ERROR_CODES.RECOVERY_ATTEMPTED]: 'Tentative de récupération',
-  [XML_ERROR_CODES.PARTIAL_PARSE]: 'Parse partiel effectué'
+  [XML_ERROR_CODES.PARTIAL_PARSE]: 'Parse partiel effectué',
 } as const;
 
 /**
  * Suggestions de correction par défaut
  */
 export const XML_ERROR_SUGGESTIONS = {
-  [XML_ERROR_CODES.INVALID_CHARACTER]: 'Vérifiez l\'encodage du fichier',
+  [XML_ERROR_CODES.INVALID_CHARACTER]: "Vérifiez l'encodage du fichier",
   [XML_ERROR_CODES.MALFORMED_TAG]: 'Vérifiez la syntaxe de la balise',
   [XML_ERROR_CODES.UNCLOSED_TAG]: 'Ajoutez la balise de fermeture correspondante',
-  [XML_ERROR_CODES.MISMATCHED_TAG]: 'Vérifiez l\'appariement des balises',
-  [XML_ERROR_CODES.DUPLICATE_ATTRIBUTE]: 'Supprimez l\'attribut dupliqué',
-  [XML_ERROR_CODES.INVALID_ATTRIBUTE]: 'Vérifiez la syntaxe de l\'attribut',
+  [XML_ERROR_CODES.MISMATCHED_TAG]: "Vérifiez l'appariement des balises",
+  [XML_ERROR_CODES.DUPLICATE_ATTRIBUTE]: "Supprimez l'attribut dupliqué",
+  [XML_ERROR_CODES.INVALID_ATTRIBUTE]: "Vérifiez la syntaxe de l'attribut",
   [XML_ERROR_CODES.MISSING_ROOT]: 'Ajoutez un élément racine',
   [XML_ERROR_CODES.MULTIPLE_ROOTS]: 'Supprimez les éléments racines supplémentaires',
-  [XML_ERROR_CODES.INVALID_NESTING]: 'Vérifiez l\'imbrication des éléments',
+  [XML_ERROR_CODES.INVALID_NESTING]: "Vérifiez l'imbrication des éléments",
   [XML_ERROR_CODES.INVALID_CDATA]: 'Vérifiez la syntaxe CDATA',
   [XML_ERROR_CODES.INVALID_COMMENT]: 'Vérifiez la syntaxe du commentaire',
-  [XML_ERROR_CODES.INVALID_PI]: 'Vérifiez la syntaxe de l\'instruction de traitement',
+  [XML_ERROR_CODES.INVALID_PI]: "Vérifiez la syntaxe de l'instruction de traitement",
   [XML_ERROR_CODES.INVALID_DOCTYPE]: 'Vérifiez la syntaxe DOCTYPE',
   [XML_ERROR_CODES.INVALID_NAMESPACE]: 'Vérifiez la déclaration du namespace',
   [XML_ERROR_CODES.UNDEFINED_PREFIX]: 'Définissez le préfixe ou utilisez xmlns',
   [XML_ERROR_CODES.ENTITY_EXPANSION_LIMIT]: 'Réduisez la complexité des entités',
-  [XML_ERROR_CODES.MAX_DEPTH_EXCEEDED]: 'Réduisez la profondeur d\'imbrication',
+  [XML_ERROR_CODES.MAX_DEPTH_EXCEEDED]: "Réduisez la profondeur d'imbrication",
   [XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED]: 'Réduisez la longueur du texte',
   [XML_ERROR_CODES.RECOVERY_ATTEMPTED]: 'Le parser a tenté de récupérer automatiquement',
-  [XML_ERROR_CODES.PARTIAL_PARSE]: 'Le parsing a été effectué partiellement'
+  [XML_ERROR_CODES.PARTIAL_PARSE]: 'Le parsing a été effectué partiellement',
 } as const;

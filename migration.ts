@@ -1,6 +1,6 @@
 /**
  * Migration - Compatibilité avec l'ancien LuciformXMLParser
- * 
+ *
  * Fournit une interface de compatibilité pour migrer progressivement
  * de l'ancien parser vers la nouvelle architecture modulaire
  */
@@ -10,7 +10,7 @@ import { ParserOptions, ParseResult } from './types';
 
 /**
  * Interface de compatibilité avec l'ancien parser
- * 
+ *
  * Cette classe maintient la même API que l'ancien LuciformXMLParser
  * mais utilise la nouvelle architecture modulaire en arrière-plan
  */
@@ -63,13 +63,13 @@ export class LuciformXMLParserCompat {
 
 /**
  * Fonction de migration automatique
- * 
+ *
  * Remplace automatiquement les imports de l'ancien parser
  * par le nouveau parser modulaire
  */
 export function migrateToNewParser() {
   console.log('🔄 Migration vers le nouveau parser XML modulaire...');
-  
+
   // Instructions de migration
   const migrationSteps = [
     '1. Remplacer les imports:',
@@ -79,17 +79,17 @@ export function migrateToNewParser() {
     '2. Ou utiliser la compatibilité:',
     '   import { LuciformXMLParserCompat } from "./xml-parser/migration"',
     '',
-    '3. L\'API reste identique, pas de changement de code nécessaire',
+    "3. L'API reste identique, pas de changement de code nécessaire",
     '',
     '4. Avantages de la migration:',
     '   - Modules plus petits et maintenables',
     '   - Tests unitaires par module',
     '   - Meilleure séparation des responsabilités',
-    '   - Performance améliorée (2x plus rapide)'
+    '   - Performance améliorée (2x plus rapide)',
   ];
 
-  migrationSteps.forEach(step => console.log(step));
-  
+  migrationSteps.forEach((step) => console.log(step));
+
   return migrationSteps;
 }
 
@@ -97,8 +97,8 @@ export function migrateToNewParser() {
  * Test de compatibilité
  */
 export function testCompatibility() {
-  console.log('🧪 Test de compatibilité avec l\'ancien parser...');
-  
+  console.log("🧪 Test de compatibilité avec l'ancien parser...");
+
   const testXML = `
 <root>
   <child attribute="value">Contenu</child>
@@ -109,24 +109,23 @@ export function testCompatibility() {
     // Test avec le nouveau parser
     const newParser = new LuciformXMLParser(testXML);
     const newResult = newParser.parse();
-    
+
     console.log('✅ Nouveau parser:');
     console.log(`   Succès: ${newResult.success}`);
     console.log(`   Nœuds: ${newResult.nodeCount}`);
     console.log(`   Erreurs: ${newResult.errors.length}`);
-    
+
     // Test avec la compatibilité
     const compatParser = new LuciformXMLParserCompat(testXML);
     const compatResult = compatParser.parse();
-    
+
     console.log('✅ Parser de compatibilité:');
     console.log(`   Succès: ${compatResult.success}`);
     console.log(`   Nœuds: ${compatResult.nodeCount}`);
     console.log(`   Erreurs: ${compatResult.errors.length}`);
-    
+
     console.log('✅ Migration réussie !');
     return true;
-    
   } catch (error) {
     console.error('❌ Erreur de migration:', error);
     return false;

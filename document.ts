@@ -1,6 +1,6 @@
 /**
  * XMLDocument et XMLElement - Modèles de données XML
- * 
+ *
  * Classes pour représenter la structure XML parsée
  */
 
@@ -36,9 +36,9 @@ export class XMLNode {
    */
   findChild(name: string): XMLElement | undefined {
     if (!this.children) return undefined;
-    
-    return this.children.find(child => 
-      child.type === 'element' && (child as XMLElement).name === name
+
+    return this.children.find(
+      (child) => child.type === 'element' && (child as XMLElement).name === name
     ) as XMLElement | undefined;
   }
 
@@ -47,9 +47,9 @@ export class XMLNode {
    */
   findAllChildren(name: string): XMLElement[] {
     if (!this.children) return [];
-    
-    return this.children.filter(child => 
-      child.type === 'element' && (child as XMLElement).name === name
+
+    return this.children.filter(
+      (child) => child.type === 'element' && (child as XMLElement).name === name
     ) as XMLElement[];
   }
 
@@ -58,10 +58,10 @@ export class XMLNode {
    */
   getTextContent(): string {
     if (!this.children) return '';
-    
+
     return this.children
-      .filter(child => child.type === 'text')
-      .map(child => child.content || '')
+      .filter((child) => child.type === 'text')
+      .map((child) => child.content || '')
       .join('');
   }
 }
@@ -197,7 +197,7 @@ export class XMLDocument {
    */
   addChild(child: XMLNode): void {
     this.children.push(child);
-    
+
     if (child.type === 'element' && !this.root) {
       this.root = child as XMLElement;
     }
@@ -228,7 +228,7 @@ export class XMLDocument {
    */
   getAllElements(): XMLElement[] {
     const elements: XMLElement[] = [];
-    
+
     const collectElements = (node: XMLNode) => {
       if (node.type === 'element') {
         elements.push(node as XMLElement);
