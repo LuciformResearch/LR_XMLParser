@@ -38,6 +38,17 @@ export declare class XMLElement extends XMLNode {
     closed: boolean;
     constructor(name: string, location?: Location);
     /**
+     * Namespace resolution helpers (effective mapping inherited from parents)
+     */
+    private getEffectiveNamespaces;
+    private splitQName;
+    getResolvedName(): {
+        namespace?: string;
+        local: string;
+    };
+    findByNS(namespace: string | undefined, localName: string): XMLElement | undefined;
+    findAllByNS(namespace: string | undefined, localName: string): XMLElement[];
+    /**
      * Ajoute un attribut
      */
     setAttribute(name: string, value: string): void;
@@ -81,6 +92,8 @@ export declare class XMLDocument {
     children: XMLNode[];
     namespaces: Map<string, string>;
     constructor();
+    findByNS(namespace: string | undefined, localName: string): XMLElement | undefined;
+    findAllByNS(namespace: string | undefined, localName: string): XMLElement[];
     /**
      * Ajoute un enfant au document
      */

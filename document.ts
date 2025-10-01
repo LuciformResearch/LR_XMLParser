@@ -86,6 +86,66 @@ export class XMLElement extends XMLNode {
   }
 
   /**
+   * Namespace resolution helpers (effective mapping inherited from parents)
+   */
+  private getEffectiveNamespaces(): Map<string, string> {
+    const map = new Map<string, string>([['xml', 'http://www.w3.org/XML/1998/namespace']]);
+    const stack: XMLElement[] = [];
+    let cur: XMLNode | undefined = this;
+    while (cur) {
+      if (cur.type === 'element') stack.unshift(cur as XMLElement);
+      cur = cur.parent;
+    }
+    for (const el of stack) {
+      for (const [p, uri] of el.namespaces) map.set(p, uri);
+    }
+    return map;
+  }
+
+  private splitQName(qname: string): { prefix: string; local: string } {
+    const i = qname.indexOf(':');
+    return i === -1 ? { prefix: '', local: qname } : { prefix: qname.slice(0, i), local: qname.slice(i + 1) };
+  }
+
+  getResolvedName(): { namespace?: string; local: string } {
+    const { prefix, local } = this.splitQName(this.name);
+    if (!prefix) {
+      const ns = this.getEffectiveNamespaces().get('');
+      return ns ? { namespace: ns, local } : { local };
+    }
+    const ns = this.getEffectiveNamespaces().get(prefix);
+    return ns ? { namespace: ns, local } : { local };
+  }
+
+  findByNS(namespace: string | undefined, localName: string): XMLElement | undefined {
+    const self = this.getResolvedName();
+    if (self.local === localName && (self.namespace ?? undefined) === (namespace ?? undefined)) {
+      return this;
+    }
+    for (const child of this.children) {
+      if (child.type === 'element') {
+        const hit = (child as XMLElement).findByNS(namespace, localName);
+        if (hit) return hit;
+      }
+    }
+    return undefined;
+  }
+
+  findAllByNS(namespace: string | undefined, localName: string): XMLElement[] {
+    const out: XMLElement[] = [];
+    const self = this.getResolvedName();
+    if (self.local === localName && (self.namespace ?? undefined) === (namespace ?? undefined)) {
+      out.push(this);
+    }
+    for (const child of this.children) {
+      if (child.type === 'element') {
+        out.push(...(child as XMLElement).findAllByNS(namespace, localName));
+      }
+    }
+    return out;
+  }
+
+  /**
    * Ajoute un attribut
    */
   setAttribute(name: string, value: string): void {
@@ -190,6 +250,16 @@ export class XMLDocument {
   constructor() {
     this.children = [];
     this.namespaces = new Map();
+  }
+
+  findByNS(namespace: string | undefined, localName: string): XMLElement | undefined {
+    if (this.root) return this.root.findByNS(namespace, localName);
+    return undefined;
+  }
+
+  findAllByNS(namespace: string | undefined, localName: string): XMLElement[] {
+    if (this.root) return this.root.findAllByNS(namespace, localName);
+    return [];
   }
 
   /**

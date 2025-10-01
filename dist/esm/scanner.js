@@ -102,7 +102,7 @@ export class LuciformXMLScanner {
             };
         }
         // Lire les attributs
-        const attributes = this.readAttributes();
+        const { attributes, duplicateAttributes, invalidAttributes } = this.readAttributes();
         // Vérifier si c'est auto-fermant
         const selfClosing = this.content[this.position] === '/' && this.content[this.position + 1] === '>';
         if (selfClosing) {
@@ -119,6 +119,8 @@ export class LuciformXMLScanner {
             location: startLocation,
             tagName,
             attributes,
+            invalidAttributes,
+            duplicateAttributes,
             selfClosing,
         };
     }
@@ -266,6 +268,8 @@ export class LuciformXMLScanner {
     }
     readAttributes() {
         const attributes = new Map();
+        const duplicateAttributes = [];
+        const invalidAttributes = [];
         // Skip whitespace
         while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
             this.advance();
@@ -276,21 +280,47 @@ export class LuciformXMLScanner {
             const attrName = this.readAttributeName();
             if (!attrName)
                 break;
-            // Skip whitespace and '='
-            while (this.position < this.content.length &&
-                (/\s/.test(this.content[this.position]) || this.content[this.position] === '=')) {
+            // Skip whitespace
+            while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
                 this.advance();
             }
+            // Expect '='
+            if (this.content[this.position] !== '=') {
+                invalidAttributes.push(attrName); // no value assigned
+                // Skip until whitespace or tag end to avoid infinite loops
+                while (this.position < this.content.length &&
+                    !/\s|>|\//.test(this.content[this.position])) {
+                    this.advance();
+                }
+                // continue to next attribute
+                while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
+                    this.advance();
+                }
+                continue;
+            }
+            this.advance(); // consume '='
             const attrValue = this.readAttributeValue();
             if (attrValue !== null) {
+                if (attributes.has(attrName)) {
+                    duplicateAttributes.push(attrName);
+                }
                 attributes.set(attrName, attrValue);
+                // After closing quote, ensure separator or tag end
+                if (this.position < this.content.length &&
+                    !/\s|>|\//.test(this.content[this.position])) {
+                    invalidAttributes.push(`${attrName}/*missing-space*/`);
+                }
+            }
+            else {
+                // Not a quoted value => invalid
+                invalidAttributes.push(attrName);
             }
             // Skip whitespace
             while (this.position < this.content.length && /\s/.test(this.content[this.position])) {
                 this.advance();
             }
         }
-        return attributes;
+        return { attributes, duplicateAttributes, invalidAttributes };
     }
     readAttributeName() {
         const start = this.position;

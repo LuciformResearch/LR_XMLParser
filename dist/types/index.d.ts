@@ -24,6 +24,7 @@ export declare class LuciformXMLParser {
     private maxPILength;
     private useUnicodeNames;
     private mode;
+    private maxRecoveries?;
     constructor(content: string, options?: ParserOptions);
     /**
      * Parse le XML avec mode Luciform-permissif

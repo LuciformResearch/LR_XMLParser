@@ -46,13 +46,26 @@ describe('Edge cases', () => {
     expect(resComment.diagnostics.map(d => d.code)).toContain('MAX_TEXT_LENGTH_EXCEEDED');
   });
 
+  it('diagnoses missing space between attributes', () => {
+    const xml = '<root><a foo="1"bar="2"></a></root>';
+    const res = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+    const codes = res.diagnostics.map(d => d.code);
+    expect(codes).toContain('ATTR_MISSING_SPACE');
+  });
+
+  it('diagnoses attribute without value or unquoted', () => {
+    const xml = '<root><a invalid= bad></a></root>';
+    const res = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+    const codes = res.diagnostics.map(d => d.code);
+    expect(codes).toContain('ATTR_NO_VALUE');
+  });
+
   it('handles PI/comment limits and doctype', () => {
     const xml = '<?pi abc?><!DOCTYPE note SYSTEM "abc"><root><!--hello--></root>';
     const res = new LuciformXMLParser(xml, { maxPILength: 1, mode: 'luciform-permissive' }).parse();
     const codes = res.diagnostics.map(d => d.code);
     expect(codes).toContain('MAX_TEXT_LENGTH_EXCEEDED'); // PI length exceeded
-    // Current DOCTYPE parser stores the keyword as name
-    expect(res.document?.doctype?.name).toBe('DOCTYPE');
+    expect(res.document?.doctype?.name).toBe('note');
   });
 
   it('handles BOM and whitespace', () => {

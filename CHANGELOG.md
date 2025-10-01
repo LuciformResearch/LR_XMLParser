@@ -17,6 +17,14 @@ All notable changes to this project will be documented in this file.
 - 0.1.6
   - Add Error handling sections to README (EN/FR)
   - Add edge-case tests and list them in READMEs
+- 0.1.7
+  - Namespaces (phase 1): xmlns mapping, unbound prefix diagnostics; hide xmlns from attributes
+  - DOCTYPE fidelity: extract root name and PUBLIC/SYSTEM
+  - Attribute checks: duplicates surfaced; count/value length limits enforced
+- 0.1.8
+  - Namespaces (phase 2): stricter QName validation (BAD_QNAME); reserved prefix checks (XMLNS_PREFIX_RESERVED, XML_PREFIX_URI)
+  - ns-aware query helpers: findByNS/findAllByNS on Document/Element
+  - README edge cases updated to mention namespaces
 - 0.1.2
   - Update contact email and README defaults (English primary, French secondary)
 - 0.1.1

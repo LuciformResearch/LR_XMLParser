@@ -11,6 +11,8 @@ export class DiagnosticManager {
   private diagnostics: Diagnostic[] = [];
   private errors: Diagnostic[] = [];
   private recoveryCount: number = 0;
+  private recoveryCap?: number;
+  private recoveryCapped: boolean = false;
 
   /**
    * Ajoute un diagnostic
@@ -67,6 +69,9 @@ export class DiagnosticManager {
    */
   incrementRecovery(): void {
     this.recoveryCount++;
+    if (this.recoveryCap !== undefined && this.recoveryCount > this.recoveryCap) {
+      this.recoveryCapped = true;
+    }
   }
 
   /**
@@ -102,6 +107,14 @@ export class DiagnosticManager {
    */
   getRecoveryCount(): number {
     return this.recoveryCount;
+  }
+
+  setRecoveryCap(cap?: number): void {
+    this.recoveryCap = cap;
+  }
+
+  getRecoveryReport(): { attempts: number; capped: boolean } {
+    return { attempts: this.recoveryCount, capped: this.recoveryCapped };
   }
 
   /**
@@ -173,6 +186,11 @@ export const XML_ERROR_CODES = {
   // Erreurs de namespace
   INVALID_NAMESPACE: 'INVALID_NAMESPACE',
   UNDEFINED_PREFIX: 'UNDEFINED_PREFIX',
+  XMLNS_PREFIX_RESERVED: 'XMLNS_PREFIX_RESERVED',
+  XML_PREFIX_URI: 'XML_PREFIX_URI',
+  BAD_QNAME: 'BAD_QNAME',
+  ATTR_MISSING_SPACE: 'ATTR_MISSING_SPACE',
+  ATTR_NO_VALUE: 'ATTR_NO_VALUE',
 
   // Erreurs de sécurité
   ENTITY_EXPANSION_LIMIT: 'ENTITY_EXPANSION_LIMIT',
@@ -203,6 +221,11 @@ export const XML_ERROR_MESSAGES = {
   [XML_ERROR_CODES.INVALID_DOCTYPE]: 'Déclaration DOCTYPE invalide',
   [XML_ERROR_CODES.INVALID_NAMESPACE]: 'Namespace invalide',
   [XML_ERROR_CODES.UNDEFINED_PREFIX]: 'Préfixe non défini',
+  [XML_ERROR_CODES.XMLNS_PREFIX_RESERVED]: 'Le préfixe "xmlns" est réservé',
+  [XML_ERROR_CODES.XML_PREFIX_URI]: 'Le préfixe "xml" doit être lié à l\'URI standard',
+  [XML_ERROR_CODES.BAD_QNAME]: 'Nom qualifié (QName) invalide',
+  [XML_ERROR_CODES.ATTR_MISSING_SPACE]: 'Espace requis après la valeur de l\'attribut',
+  [XML_ERROR_CODES.ATTR_NO_VALUE]: 'Attribut sans valeur ou valeur non quotée',
   [XML_ERROR_CODES.ENTITY_EXPANSION_LIMIT]: "Limite d'expansion d'entité dépassée",
   [XML_ERROR_CODES.MAX_DEPTH_EXCEEDED]: 'Profondeur maximale dépassée',
   [XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED]: 'Longueur de texte maximale dépassée',
@@ -229,6 +252,11 @@ export const XML_ERROR_SUGGESTIONS = {
   [XML_ERROR_CODES.INVALID_DOCTYPE]: 'Vérifiez la syntaxe DOCTYPE',
   [XML_ERROR_CODES.INVALID_NAMESPACE]: 'Vérifiez la déclaration du namespace',
   [XML_ERROR_CODES.UNDEFINED_PREFIX]: 'Définissez le préfixe ou utilisez xmlns',
+  [XML_ERROR_CODES.XMLNS_PREFIX_RESERVED]: 'N\'utilisez pas "xmlns" comme préfixe applicatif',
+  [XML_ERROR_CODES.XML_PREFIX_URI]: 'Utilisez http://www.w3.org/XML/1998/namespace pour "xml"',
+  [XML_ERROR_CODES.BAD_QNAME]: 'Limitez le QName à un seul ":" et un nom valide',
+  [XML_ERROR_CODES.ATTR_MISSING_SPACE]: 'Ajoutez un espace avant le prochain attribut',
+  [XML_ERROR_CODES.ATTR_NO_VALUE]: 'Entourez la valeur d\'apostrophes ou guillemets',
   [XML_ERROR_CODES.ENTITY_EXPANSION_LIMIT]: 'Réduisez la complexité des entités',
   [XML_ERROR_CODES.MAX_DEPTH_EXCEEDED]: "Réduisez la profondeur d'imbrication",
   [XML_ERROR_CODES.MAX_TEXT_LENGTH_EXCEEDED]: 'Réduisez la longueur du texte',

@@ -1,6 +1,6 @@
 {
   "name": "@luciformresearch/xmlparser",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "High-performance XML parser for LLM workflows and general XML with robust diagnostics and permissive mode.",
   "license": "MIT",
   "author": "Lucie Defraiteur <luciedefraiteur@luciformresearch.com>",
@@ -59,6 +59,11 @@
       "types": "./dist/types/migration.d.ts",
       "import": "./dist/esm/migration.js",
       "require": "./dist/cjs/migration.js"
+    },
+    "./sax": {
+      "types": "./dist/types/sax.d.ts",
+      "import": "./dist/esm/sax.js",
+      "require": "./dist/cjs/sax.js"
     }
   },
   "sideEffects": false,

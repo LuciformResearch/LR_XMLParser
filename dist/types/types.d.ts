@@ -43,6 +43,10 @@ export interface ParseResult {
     diagnostics: Diagnostic[];
     recoveryCount: number;
     nodeCount: number;
+    recoveryReport?: {
+        attempts: number;
+        capped: boolean;
+    };
 }
 export type ScannerState = 'Text' | 'StartTag' | 'EndTag' | 'Comment' | 'PI' | 'CDATA' | 'Doctype';
 export interface ScannerOptions {
@@ -58,6 +62,7 @@ export interface ScannerOptions {
 }
 export interface ParserOptions extends ScannerOptions {
     mode?: 'strict' | 'permissive' | 'luciform-permissive';
+    maxRecoveries?: number;
 }
 export interface XMLNode {
     type: 'element' | 'text' | 'comment' | 'pi' | 'cdata' | 'doctype';

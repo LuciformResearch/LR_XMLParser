@@ -92,6 +92,7 @@ lr_xmlparser/
 - Limits: `maxDepth`, `maxTextLength`, `maxPILength`
 - Processing instructions and DOCTYPE handling
 - BOM + whitespace tolerance
+- Namespaces: `xmlns`/`xmlns:prefix` mapping, unbound prefix diagnostics
 
 ## Express API
 
@@ -103,6 +104,31 @@ export class LuciformXMLParser {
 ```
 
 Options include security and performance limits (depth, text length, entity expansion), plus mode: `strict | permissive | luciform-permissive`.
+
+Namespace-aware queries:
+```ts
+// Given <root xmlns:foo="urn:foo"><foo:item/></root>
+const item = result.document?.findByNS('urn:foo', 'item');
+const items = result.document?.findAllByNS('urn:foo', 'item');
+```
+
+SAX/streaming (large inputs):
+```ts
+import { LuciformSAX } from '@luciformresearch/xmlparser/sax';
+
+new LuciformSAX(xml, {
+  onStartElement: (name, attrs) => { /* ... */ },
+  onEndElement: (name) => {},
+  onText: (text) => {},
+}).run();
+```
+
+## Namespaces
+
+- Default namespace applies to elements, not attributes.
+- Prefixed names (e.g., `foo:bar`) require a bound `xmlns:foo` in scope.
+- Reserved: `xmlns` prefix/name; `xml` must map to `http://www.w3.org/XML/1998/namespace`.
+- Use `findByNS(nsUri, local)`/`findAllByNS` for ns-aware traversal.
 
 <!-- Migration notes removed to keep README product‑focused. Compatibility wrapper remains available via subpath export if needed. -->
 

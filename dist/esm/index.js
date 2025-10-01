@@ -28,12 +28,14 @@ export class LuciformXMLParser {
         this.maxPILength = options.maxPILength || 1000;
         this.useUnicodeNames = options.useUnicodeNames || true;
         this.mode = options.mode || 'luciform-permissive';
+        this.maxRecoveries = options.maxRecoveries;
     }
     /**
      * Parse le XML avec mode Luciform-permissif
      */
     parse() {
         const diagnosticManager = new DiagnosticManager();
+        diagnosticManager.setRecoveryCap(this.maxRecoveries);
         let document;
         let nodeCount = 0;
         try {
@@ -47,6 +49,7 @@ export class LuciformXMLParser {
         const diagnostics = diagnosticManager.getDiagnostics();
         const errors = diagnosticManager.getErrors();
         const recoveryCount = diagnosticManager.getRecoveryCount();
+        const recoveryReport = diagnosticManager.getRecoveryReport();
         return {
             success: errors.length === 0,
             document,
@@ -54,6 +57,7 @@ export class LuciformXMLParser {
             diagnostics,
             recoveryCount,
             nodeCount,
+            recoveryReport,
         };
     }
     /**
@@ -62,6 +66,8 @@ export class LuciformXMLParser {
     parseDocument(scanner, diagnostics) {
         const document = new XMLDocument();
         let token;
+        // Base namespace frame
+        const baseNS = new Map([['xml', 'http://www.w3.org/XML/1998/namespace']]);
         while ((token = scanner.next()) !== null) {
             switch (token.type) {
                 case 'PI': {
@@ -85,7 +91,7 @@ export class LuciformXMLParser {
                     break;
                 }
                 case 'StartTag': {
-                    const element = this.parseElement(scanner, token, diagnostics, 0);
+                    const element = this.parseElement(scanner, token, diagnostics, 0, baseNS);
                     if (element) {
                         document.addChild(element);
                     }
@@ -136,35 +142,143 @@ export class LuciformXMLParser {
      * Parse une déclaration DOCTYPE
      */
     parseDoctype(token, _diagnostics) {
-        const content = token.content || '';
-        const parts = content.split(/\s+/);
-        const name = parts[0];
+        const raw = token.content || '';
+        const content = raw.trim();
+        let rootName;
         let publicId;
         let systemId;
-        for (let i = 1; i < parts.length; i++) {
-            const part = parts[i];
-            if (part === 'PUBLIC' && i + 1 < parts.length) {
-                publicId = parts[i + 1].replace(/['"]/g, '');
+        // Basic DOCTYPE pattern parsing
+        // Example: DOCTYPE note PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://..."
+        //          DOCTYPE note SYSTEM "http://..."
+        //          DOCTYPE note [ ... ]
+        const m = content.match(/^DOCTYPE\s+([^\s>]+)\s*(.*)$/i);
+        if (m) {
+            rootName = m[1];
+            const rest = m[2] || '';
+            const restU = rest.toUpperCase();
+            if (restU.includes('PUBLIC')) {
+                const qm = rest.match(/PUBLIC\s+(['"])\s*([^'"]+)\1\s+(['"])\s*([^'"]+)\3/i);
+                if (qm) {
+                    publicId = qm[2];
+                    systemId = qm[4];
+                }
             }
-            else if (part === 'SYSTEM' && i + 1 < parts.length) {
-                systemId = parts[i + 1].replace(/['"]/g, '');
+            else if (restU.includes('SYSTEM')) {
+                const sm = rest.match(/SYSTEM\s+(['"])\s*([^'"]+)\1/i);
+                if (sm) {
+                    systemId = sm[2];
+                }
             }
         }
-        return new XMLDoctype(name, publicId, systemId, token.location);
+        // Fallback to previous behavior if no match
+        if (!rootName) {
+            const partsFallback = content.split(/\s+/);
+            rootName = partsFallback[0];
+        }
+        return new XMLDoctype(rootName, publicId, systemId, token.location);
     }
     /**
      * Parse un élément XML
      */
-    parseElement(scanner, startToken, diagnostics, depth) {
+    parseElement(scanner, startToken, diagnostics, depth, parentNS) {
         if (depth > this.maxDepth) {
             diagnostics.addError(XML_ERROR_CODES.MAX_DEPTH_EXCEEDED, `Profondeur maximale dépassée: ${depth}`, startToken.location);
             return null;
         }
         const element = new XMLElement(startToken.tagName || '', startToken.location);
-        // Ajouter les attributs
+        // Namespace handling: derive current frame from parent
+        const currentNS = new Map(parentNS);
+        const splitQName = (qname) => {
+            const i = qname.indexOf(':');
+            return i === -1 ? { prefix: '', local: qname } : { prefix: qname.slice(0, i), local: qname.slice(i + 1) };
+        };
+        const checkNamespace = (qname, loc, isAttribute = false) => {
+            const colonCount = (qname.match(/:/g) || []).length;
+            if (colonCount > 1) {
+                diagnostics.addError(XML_ERROR_CODES.BAD_QNAME, `QName invalide (trop de ':'): ${qname}`, loc);
+                diagnostics.incrementRecovery();
+                return;
+            }
+            const { prefix } = splitQName(qname);
+            if (prefix && prefix !== 'xml') {
+                if (!currentNS.has(prefix)) {
+                    diagnostics.addError(XML_ERROR_CODES.UNDEFINED_PREFIX, `Préfixe non défini: ${prefix}`, loc);
+                    diagnostics.incrementRecovery();
+                }
+            }
+            else if (!prefix && isAttribute) {
+                // default namespace does not apply to attributes
+            }
+        };
+        // First pass: process xmlns declarations; store on element.namespaces and currentNS
         if (startToken.attributes) {
             for (const [name, value] of startToken.attributes) {
+                if (name === 'xmlns') {
+                    currentNS.set('', value);
+                    element.setNamespace('', value);
+                }
+                else if (name.startsWith('xmlns:')) {
+                    const prefix = name.slice(6);
+                    if (prefix === 'xmlns') {
+                        diagnostics.addError(XML_ERROR_CODES.INVALID_NAMESPACE, 'Le préfixe "xmlns" est réservé', startToken.location);
+                        diagnostics.incrementRecovery();
+                    }
+                    else if (prefix === 'xml' && value !== 'http://www.w3.org/XML/1998/namespace') {
+                        diagnostics.addError(XML_ERROR_CODES.INVALID_NAMESPACE, 'Le préfixe "xml" doit être lié à http://www.w3.org/XML/1998/namespace', startToken.location);
+                        diagnostics.incrementRecovery();
+                    }
+                    else {
+                        currentNS.set(prefix, value);
+                        element.setNamespace(prefix, value);
+                    }
+                }
+            }
+        }
+        // Validate element qname
+        if (element.name) {
+            if (/^xmlns(?::|$)/.test(element.name)) {
+                diagnostics.addError(XML_ERROR_CODES.XMLNS_PREFIX_RESERVED, 'Le préfixe ou nom "xmlns" est réservé', startToken.location);
+                diagnostics.incrementRecovery();
+            }
+            checkNamespace(element.name, startToken.location, false);
+        }
+        // Second pass: enforce limits, handle duplicates/invalids, and set non-xmlns attributes
+        if (startToken.attributes) {
+            if (startToken.duplicateAttributes && startToken.duplicateAttributes.length > 0) {
+                for (const dup of startToken.duplicateAttributes) {
+                    diagnostics.addWarning(XML_ERROR_CODES.DUPLICATE_ATTRIBUTE, `Attribut dupliqué: ${dup}`, startToken.location);
+                    diagnostics.incrementRecovery();
+                }
+            }
+            if (startToken.invalidAttributes && startToken.invalidAttributes.length > 0) {
+                for (const inval of startToken.invalidAttributes) {
+                    if (inval.endsWith('/*missing-space*/')) {
+                        const name = inval.replace(/\/\*missing-space\*\/$/, '');
+                        diagnostics.addWarning(XML_ERROR_CODES.ATTR_MISSING_SPACE, `Espace requis après la valeur de "${name}"`, startToken.location);
+                    }
+                    else {
+                        diagnostics.addWarning(XML_ERROR_CODES.ATTR_NO_VALUE, `Attribut sans valeur ou non quotée: ${inval}`, startToken.location);
+                    }
+                    diagnostics.incrementRecovery();
+                }
+            }
+            let count = 0;
+            for (const [name, value] of startToken.attributes) {
+                if (name === 'xmlns' || name.startsWith('xmlns:'))
+                    continue;
+                if (count >= this.maxAttrCount) {
+                    diagnostics.addError(XML_ERROR_CODES.INVALID_ATTRIBUTE, `Nombre d'attributs dépassé: > ${this.maxAttrCount}`, startToken.location);
+                    diagnostics.incrementRecovery();
+                    continue;
+                }
+                if (value.length > this.maxAttrValueLength) {
+                    diagnostics.addError(XML_ERROR_CODES.INVALID_ATTRIBUTE, `Valeur d'attribut trop longue (${value.length} > ${this.maxAttrValueLength}) pour ${name}`, startToken.location);
+                    diagnostics.incrementRecovery();
+                    continue;
+                }
+                checkNamespace(name, startToken.location, true);
                 element.setAttribute(name, value);
+                count++;
             }
         }
         // Si auto-fermant, on a fini
@@ -176,7 +290,7 @@ export class LuciformXMLParser {
         while ((token = scanner.next()) !== null) {
             switch (token.type) {
                 case 'StartTag': {
-                    const childElement = this.parseElement(scanner, token, diagnostics, depth + 1);
+                    const childElement = this.parseElement(scanner, token, diagnostics, depth + 1, currentNS);
                     if (childElement) {
                         element.addChild(childElement);
                     }

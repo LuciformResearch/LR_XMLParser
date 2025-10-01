@@ -82,6 +82,7 @@ lr_xmlparser/
 - Limites: `maxDepth`, `maxTextLength`, `maxPILength`
 - Instructions de traitement (PI) et DOCTYPE
 - BOM + tolérance aux espaces
+- Namespaces: gestion `xmlns`/`xmlns:prefix`, diagnostics de préfixe non lié
 
 ## API express
 
@@ -93,6 +94,31 @@ export class LuciformXMLParser {
 ```
 
 Les options couvrent sécurité et performance (profondeur, longueur de texte, expansion d’entités), plus le mode: `strict | permissive | luciform-permissive`.
+
+Requêtes sensibles aux namespaces:
+```ts
+// Étant donné <root xmlns:foo="urn:foo"><foo:item/></root>
+const item = result.document?.findByNS('urn:foo', 'item');
+const items = result.document?.findAllByNS('urn:foo', 'item');
+```
+
+SAX/streaming (gros flux):
+```ts
+import { LuciformSAX } from '@luciformresearch/xmlparser/sax';
+
+new LuciformSAX(xml, {
+  onStartElement: (name, attrs) => { /* ... */ },
+  onEndElement: (name) => {},
+  onText: (text) => {},
+}).run();
+```
+
+## Namespaces
+
+- Le namespace par défaut s’applique aux éléments, pas aux attributs.
+- Les noms préfixés (ex: `foo:bar`) exigent un `xmlns:foo` lié en portée.
+- Réservés: préfixe/nom `xmlns`; `xml` doit pointer vers `http://www.w3.org/XML/1998/namespace`.
+- Utilisez `findByNS(nsUri, local)` / `findAllByNS` pour une traversée ns-aware.
 
 ## Tests et validation
 
