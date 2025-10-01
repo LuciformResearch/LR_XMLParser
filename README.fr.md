@@ -10,6 +10,16 @@ Projet mené par LuciformResearch (Lucie Defraiteur).
 
 — English: see README.md
 
+## Fonctionnalités clés
+
+- Namespaces: gestion `xmlns`/`xmlns:prefix` et requêtes sensibles aux namespaces (`findByNS`, `findAllByNS`).
+- Streaming (SAX): API événementielle légère `LuciformSAX` pour les gros flux.
+- Récupération robuste: modes permissifs avec diagnostics; plafond `maxRecoveries` + `recoveryReport { attempts, capped, codes?, notes? }`.
+- Diagnostics précis: codes structurés, messages, suggestions, positions.
+- Sécurité par défaut: limites de profondeur, longueur texte/PI/commentaires; garde contre l’expansion d’entités.
+- Builds ESM/CJS: exports map compatibles; types inclus.
+- Fusion de texte: `coalesceTextNodes` (par défaut true) fusionne les textes adjacents pour réduire la fragmentation.
+
 ## Démarrage (npm)
 
 - Installation:
@@ -28,11 +38,31 @@ Projet mené par LuciformResearch (Lucie Defraiteur).
   const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
   ```
 
+- Démarrage rapide (SAX/streaming):
+
+  ```ts
+  import { LuciformSAX } from '@luciformresearch/xmlparser/sax';
+  new LuciformSAX(xml, {
+    onStartElement: (name, attrs) => {},
+    onEndElement: (name) => {},
+    onText: (t) => {},
+  }).run();
+  ```
+
 - Subpath exports (optionnels): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.
 
 ## Aperçu
 
 Architecture modulaire (scanner → parser → modèles → diagnostics) pensée pour la lisibilité, la testabilité et la performance.
+
+## Nouveautés
+
+- 0.2.3
+  - Diagnostics/messages en anglais, option `coalesceTextNodes` (par défaut true), benchmarks avec métriques mémoire.
+- 0.2.2
+  - `recoveryReport` enrichi (`codes`, `notes`), tests SAX, squelette de benchmarks (`npm run bench`).
+- 0.2.1
+  - Plafond de récupération: arrêt de l’analyse au‑delà de `maxRecoveries`; diagnostics de synthèse; document partiel.
 
 ### Usages clés
 

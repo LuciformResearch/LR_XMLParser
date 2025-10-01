@@ -14,6 +14,16 @@ Project by LuciformResearch (Lucie Defraiteur).
 
 — Français: see README.fr.md
 
+## Key Features
+
+- Namespaces: `xmlns`/`xmlns:prefix` mapping with ns‑aware queries (`findByNS`, `findAllByNS`).
+- Streaming (SAX): lightweight event API via `LuciformSAX` for large inputs.
+- Robust recovery: permissive modes with diagnostics; `maxRecoveries` cap + `recoveryReport { attempts, capped, codes?, notes? }`.
+- Precise diagnostics: structured codes, messages, suggestions, and locations.
+- Secure defaults: limits for depth, text/PI/comment length; entity expansion guard.
+- Dual build: ESM/CJS with exports map; types included.
+- Text coalescing: `coalesceTextNodes` (default true) merges adjacent text nodes to reduce fragmentation.
+
 ## Getting started (npm)
 
 - Install:
@@ -34,6 +44,17 @@ Project by LuciformResearch (Lucie Defraiteur).
   const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
   ```
 
+- Streaming (SAX) quickstart:
+
+  ```ts
+  import { LuciformSAX } from '@luciformresearch/xmlparser/sax';
+  new LuciformSAX(xml, {
+    onStartElement: (name, attrs) => {},
+    onEndElement: (name) => {},
+    onText: (t) => {},
+  }).run();
+  ```
+
 - Subpath exports (optional): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.
 
 ## License
@@ -43,6 +64,15 @@ MIT with reinforced attribution. See [LICENSE](LICENSE) for terms, attribution o
 ## Overview
 
 LR XMLParser follows a modular architecture (scanner → parser → models → diagnostics) focused on clarity, testability, and performance.
+
+## What's New
+
+- 0.2.3
+  - All diagnostics/messages in English, `coalesceTextNodes` option (default true), benchmarks now include memory metrics.
+- 0.2.2
+  - `recoveryReport` enriched with `codes` and `notes`, SAX unit tests, benchmarks scaffold (`npm run bench`).
+- 0.2.1
+  - Recovery cap behavior: stop scanning when `maxRecoveries` exceeded; summary diagnostics added; partial document returned.
 
 ### Key use cases
 
