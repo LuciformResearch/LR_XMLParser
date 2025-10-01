@@ -13,6 +13,8 @@ export class DiagnosticManager {
   private recoveryCount: number = 0;
   private recoveryCap?: number;
   private recoveryCapped: boolean = false;
+  private recoveryCodes: Set<string> = new Set();
+  private recoveryNotes: string[] = [];
 
   /**
    * Ajoute un diagnostic
@@ -67,8 +69,9 @@ export class DiagnosticManager {
   /**
    * Incrémente le compteur de récupération
    */
-  incrementRecovery(): void {
+  incrementRecovery(code?: string): void {
     this.recoveryCount++;
+    if (code) this.recoveryCodes.add(code);
     if (this.recoveryCap !== undefined && this.recoveryCount > this.recoveryCap) {
       this.recoveryCapped = true;
     }
@@ -113,8 +116,10 @@ export class DiagnosticManager {
     this.recoveryCap = cap;
   }
 
-  getRecoveryReport(): { attempts: number; capped: boolean } {
-    return { attempts: this.recoveryCount, capped: this.recoveryCapped };
+  getRecoveryReport(): { attempts: number; capped: boolean; codes?: string[]; notes?: string[] } {
+    const codes = this.recoveryCodes.size ? Array.from(this.recoveryCodes) : undefined;
+    const notes = this.recoveryNotes.length ? [...this.recoveryNotes] : undefined;
+    return { attempts: this.recoveryCount, capped: this.recoveryCapped, codes, notes };
   }
 
   /**
@@ -145,6 +150,8 @@ export class DiagnosticManager {
     this.diagnostics = [];
     this.errors = [];
     this.recoveryCount = 0;
+    this.recoveryCodes.clear();
+    this.recoveryNotes = [];
   }
 
   /**
@@ -164,6 +171,13 @@ export class DiagnosticManager {
       infos: this.getInfos().length,
       recoveries: this.recoveryCount,
     };
+  }
+
+  /**
+   * Ajoute une note de récupération (pour le rapport)
+   */
+  addRecoveryNote(note: string): void {
+    this.recoveryNotes.push(note);
   }
 }
 

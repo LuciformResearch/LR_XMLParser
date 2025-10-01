@@ -130,6 +130,16 @@ new LuciformSAX(xml, {
 - Reserved: `xmlns` prefix/name; `xml` must map to `http://www.w3.org/XML/1998/namespace`.
 - Use `findByNS(nsUri, local)`/`findAllByNS` for ns-aware traversal.
 
+### Quick Reference
+
+| Case | Element resolution | Attribute resolution | Example |
+| --- | --- | --- | --- |
+| Default namespace declared (`xmlns="urn:d"`) | Applies to element names | Does not apply to attributes | `<root xmlns="urn:d"><item a="1"/></root>` → `item` resolves to `urn:d:item`; `a` has no namespace |
+| Prefixed element (`foo:bar`) | Requires `xmlns:foo="…"` in scope | n/a | `<x xmlns:foo="urn:f"><foo:bar/></x>` → element resolves to `urn:f:bar` |
+| Prefixed attribute (`foo:a`) | n/a | Requires `xmlns:foo="…"` in scope | `<x xmlns:foo="urn:f" foo:a="1"/>` → attribute `a` in `urn:f` |
+| Unbound prefix | Diagnostic `UNDEFINED_PREFIX` | Diagnostic `UNDEFINED_PREFIX` | `<a:b/>` without `xmlns:a` |
+| Reserved names | Diagnostic (`XMLNS_PREFIX_RESERVED`, `XML_PREFIX_URI`) | Diagnostic | `xmlns:test`, `xml` bound to wrong URI |
+
 <!-- Migration notes removed to keep README product‑focused. Compatibility wrapper remains available via subpath export if needed. -->
 
 ## Error handling
@@ -137,7 +147,7 @@ new LuciformSAX(xml, {
 - Inspect `result.diagnostics` for structured issues (code, message, suggestion, location).
 - `result.success` is false when errors are present; permissive mode may still return a usable `document`.
 - Typical codes: `UNCLOSED_TAG`, `MISMATCHED_TAG`, `INVALID_COMMENT`, `INVALID_CDATA`, `MAX_DEPTH_EXCEEDED`, `MAX_TEXT_LENGTH_EXCEEDED`.
- - Recovery cap: set `maxRecoveries` to cap automatic fixes in permissive modes. When the cap is exceeded, the parser stops further scanning, adds `RECOVERY_ATTEMPTED` and `PARTIAL_PARSE` info diagnostics, and returns a partial document. See `result.recoveryReport` for `{ attempts, capped }`.
+ - Recovery cap: set `maxRecoveries` to cap automatic fixes in permissive modes. When the cap is exceeded, the parser stops further scanning, adds `RECOVERY_ATTEMPTED` and `PARTIAL_PARSE` info diagnostics, and returns a partial document. See `result.recoveryReport` for `{ attempts, capped, codes?, notes? }`.
 
 ## Testing and validation
 

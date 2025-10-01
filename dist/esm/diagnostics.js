@@ -10,6 +10,8 @@ export class DiagnosticManager {
         this.errors = [];
         this.recoveryCount = 0;
         this.recoveryCapped = false;
+        this.recoveryCodes = new Set();
+        this.recoveryNotes = [];
     }
     /**
      * Ajoute un diagnostic
@@ -59,8 +61,10 @@ export class DiagnosticManager {
     /**
      * Incrémente le compteur de récupération
      */
-    incrementRecovery() {
+    incrementRecovery(code) {
         this.recoveryCount++;
+        if (code)
+            this.recoveryCodes.add(code);
         if (this.recoveryCap !== undefined && this.recoveryCount > this.recoveryCap) {
             this.recoveryCapped = true;
         }
@@ -99,7 +103,9 @@ export class DiagnosticManager {
         this.recoveryCap = cap;
     }
     getRecoveryReport() {
-        return { attempts: this.recoveryCount, capped: this.recoveryCapped };
+        const codes = this.recoveryCodes.size ? Array.from(this.recoveryCodes) : undefined;
+        const notes = this.recoveryNotes.length ? [...this.recoveryNotes] : undefined;
+        return { attempts: this.recoveryCount, capped: this.recoveryCapped, codes, notes };
     }
     /**
      * Indique si la limite de récupération a été dépassée
@@ -126,6 +132,8 @@ export class DiagnosticManager {
         this.diagnostics = [];
         this.errors = [];
         this.recoveryCount = 0;
+        this.recoveryCodes.clear();
+        this.recoveryNotes = [];
     }
     /**
      * Obtient un résumé des diagnostics
@@ -138,6 +146,12 @@ export class DiagnosticManager {
             infos: this.getInfos().length,
             recoveries: this.recoveryCount,
         };
+    }
+    /**
+     * Ajoute une note de récupération (pour le rapport)
+     */
+    addRecoveryNote(note) {
+        this.recoveryNotes.push(note);
     }
 }
 /**

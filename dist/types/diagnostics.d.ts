@@ -11,6 +11,8 @@ export declare class DiagnosticManager {
     private recoveryCount;
     private recoveryCap?;
     private recoveryCapped;
+    private recoveryCodes;
+    private recoveryNotes;
     /**
      * Ajoute un diagnostic
      */
@@ -30,7 +32,7 @@ export declare class DiagnosticManager {
     /**
      * Incrémente le compteur de récupération
      */
-    incrementRecovery(): void;
+    incrementRecovery(code?: string): void;
     /**
      * Obtient tous les diagnostics
      */
@@ -55,6 +57,8 @@ export declare class DiagnosticManager {
     getRecoveryReport(): {
         attempts: number;
         capped: boolean;
+        codes?: string[];
+        notes?: string[];
     };
     /**
      * Indique si la limite de récupération a été dépassée
@@ -82,6 +86,10 @@ export declare class DiagnosticManager {
         infos: number;
         recoveries: number;
     };
+    /**
+     * Ajoute une note de récupération (pour le rapport)
+     */
+    addRecoveryNote(note: string): void;
 }
 /**
  * Codes d'erreur XML standardisés

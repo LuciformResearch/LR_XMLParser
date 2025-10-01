@@ -1,6 +1,6 @@
 {
   "name": "@luciformresearch/xmlparser",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "High-performance XML parser for LLM workflows and general XML with robust diagnostics and permissive mode.",
   "license": "MIT",
   "author": "Lucie Defraiteur <luciedefraiteur@luciformresearch.com>",
@@ -84,7 +84,8 @@
     "test:ci": "vitest run --coverage --reporter=default",
     "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
     "format": "prettier -w .",
-    "release": "npm version patch && git tag v$npm_package_version"
+    "release": "npm version patch && git tag v$npm_package_version",
+    "bench": "node scripts/bench/basic.mjs"
   },
   "engines": {
     "node": ">=18"

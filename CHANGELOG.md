@@ -39,3 +39,7 @@ All notable changes to this project will be documented in this file.
   - Update contact email and README defaults (English primary, French secondary)
 - 0.1.1
   - Initial public release with dual ESM/CJS and exports map
+- 0.2.2
+  - Enrich `recoveryReport` with optional `codes` and `notes` for better visibility into recovery categories and decisions.
+  - Add unit tests for `LuciformSAX` event emission and closed flags.
+  - Add benchmarks scaffold (`docs/BENCHMARKS.md`, `scripts/bench/basic.mjs`) and npm script `bench`; JSON reports saved to `Reports/Benchmarks/`.

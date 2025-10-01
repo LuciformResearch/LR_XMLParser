@@ -49,7 +49,7 @@ export interface ParseResult {
   diagnostics: Diagnostic[];
   recoveryCount: number;
   nodeCount: number;
-  recoveryReport?: { attempts: number; capped: boolean };
+  recoveryReport?: { attempts: number; capped: boolean; codes?: string[]; notes?: string[] };
 }
 
 export type ScannerState = 'Text' | 'StartTag' | 'EndTag' | 'Comment' | 'PI' | 'CDATA' | 'Doctype';

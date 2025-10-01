@@ -66,7 +66,9 @@ export class LuciformXMLParser {
         if (capped && !this.recoveryStopIssued) {
             const report = diagnostics.getRecoveryReport();
             diagnostics.addInfo(XML_ERROR_CODES.RECOVERY_ATTEMPTED, `Tentative de récupération: limite maxRecoveries dépassée après ${report.attempts} corrections`, location);
+            diagnostics.addRecoveryNote('maxRecoveries exceeded: stopping further scanning');
             diagnostics.addInfo(XML_ERROR_CODES.PARTIAL_PARSE, 'Parsing arrêté après dépassement de la limite de récupération', location, 'Augmentez maxRecoveries pour autoriser davantage de corrections');
+            diagnostics.addRecoveryNote('partial parse returned due to recovery cap');
             this.recoveryStopIssued = true;
         }
         return capped;
@@ -214,14 +216,14 @@ export class LuciformXMLParser {
             const colonCount = (qname.match(/:/g) || []).length;
             if (colonCount > 1) {
                 diagnostics.addError(XML_ERROR_CODES.BAD_QNAME, `QName invalide (trop de ':'): ${qname}`, loc);
-                diagnostics.incrementRecovery();
+                diagnostics.incrementRecovery(XML_ERROR_CODES.BAD_QNAME);
                 return;
             }
             const { prefix } = splitQName(qname);
             if (prefix && prefix !== 'xml') {
                 if (!currentNS.has(prefix)) {
                     diagnostics.addError(XML_ERROR_CODES.UNDEFINED_PREFIX, `Préfixe non défini: ${prefix}`, loc);
-                    diagnostics.incrementRecovery();
+                    diagnostics.incrementRecovery(XML_ERROR_CODES.UNDEFINED_PREFIX);
                 }
             }
             else if (!prefix && isAttribute) {
@@ -239,11 +241,11 @@ export class LuciformXMLParser {
                     const prefix = name.slice(6);
                     if (prefix === 'xmlns') {
                         diagnostics.addError(XML_ERROR_CODES.INVALID_NAMESPACE, 'Le préfixe "xmlns" est réservé', startToken.location);
-                        diagnostics.incrementRecovery();
+                        diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_NAMESPACE);
                     }
                     else if (prefix === 'xml' && value !== 'http://www.w3.org/XML/1998/namespace') {
                         diagnostics.addError(XML_ERROR_CODES.INVALID_NAMESPACE, 'Le préfixe "xml" doit être lié à http://www.w3.org/XML/1998/namespace', startToken.location);
-                        diagnostics.incrementRecovery();
+                        diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_NAMESPACE);
                     }
                     else {
                         currentNS.set(prefix, value);
@@ -256,7 +258,7 @@ export class LuciformXMLParser {
         if (element.name) {
             if (/^xmlns(?::|$)/.test(element.name)) {
                 diagnostics.addError(XML_ERROR_CODES.XMLNS_PREFIX_RESERVED, 'Le préfixe ou nom "xmlns" est réservé', startToken.location);
-                diagnostics.incrementRecovery();
+                diagnostics.incrementRecovery(XML_ERROR_CODES.XMLNS_PREFIX_RESERVED);
             }
             checkNamespace(element.name, startToken.location, false);
         }
@@ -265,7 +267,7 @@ export class LuciformXMLParser {
             if (startToken.duplicateAttributes && startToken.duplicateAttributes.length > 0) {
                 for (const dup of startToken.duplicateAttributes) {
                     diagnostics.addWarning(XML_ERROR_CODES.DUPLICATE_ATTRIBUTE, `Attribut dupliqué: ${dup}`, startToken.location);
-                    diagnostics.incrementRecovery();
+                    diagnostics.incrementRecovery(XML_ERROR_CODES.DUPLICATE_ATTRIBUTE);
                 }
             }
             if (startToken.invalidAttributes && startToken.invalidAttributes.length > 0) {
@@ -273,11 +275,12 @@ export class LuciformXMLParser {
                     if (inval.endsWith('/*missing-space*/')) {
                         const name = inval.replace(/\/\*missing-space\*\/$/, '');
                         diagnostics.addWarning(XML_ERROR_CODES.ATTR_MISSING_SPACE, `Espace requis après la valeur de "${name}"`, startToken.location);
+                        diagnostics.incrementRecovery(XML_ERROR_CODES.ATTR_MISSING_SPACE);
                     }
                     else {
                         diagnostics.addWarning(XML_ERROR_CODES.ATTR_NO_VALUE, `Attribut sans valeur ou non quotée: ${inval}`, startToken.location);
+                        diagnostics.incrementRecovery(XML_ERROR_CODES.ATTR_NO_VALUE);
                     }
-                    diagnostics.incrementRecovery();
                 }
             }
             let count = 0;
@@ -286,12 +289,12 @@ export class LuciformXMLParser {
                     continue;
                 if (count >= this.maxAttrCount) {
                     diagnostics.addError(XML_ERROR_CODES.INVALID_ATTRIBUTE, `Nombre d'attributs dépassé: > ${this.maxAttrCount}`, startToken.location);
-                    diagnostics.incrementRecovery();
+                    diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_ATTRIBUTE);
                     continue;
                 }
                 if (value.length > this.maxAttrValueLength) {
                     diagnostics.addError(XML_ERROR_CODES.INVALID_ATTRIBUTE, `Valeur d'attribut trop longue (${value.length} > ${this.maxAttrValueLength}) pour ${name}`, startToken.location);
-                    diagnostics.incrementRecovery();
+                    diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_ATTRIBUTE);
                     continue;
                 }
                 checkNamespace(name, startToken.location, true);
@@ -328,7 +331,7 @@ export class LuciformXMLParser {
                     }
                     else {
                         diagnostics.addError(XML_ERROR_CODES.MISMATCHED_TAG, `Balises non appariées: ${element.name} vs ${token.tagName}`, token.location, `Fermez la balise ${element.name}`);
-                        diagnostics.incrementRecovery();
+                        diagnostics.incrementRecovery(XML_ERROR_CODES.MISMATCHED_TAG);
                     }
                     break;
                 }
@@ -352,7 +355,7 @@ export class LuciformXMLParser {
         // Balise non fermée
         if (!element.closed) {
             diagnostics.addError(XML_ERROR_CODES.UNCLOSED_TAG, `Balise non fermée: ${element.name}`, startToken.location, `Ajoutez </${element.name}>`);
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.UNCLOSED_TAG);
         }
         return element;
     }
@@ -379,7 +382,7 @@ export class LuciformXMLParser {
         }
         if (!token.closed) {
             diagnostics.addWarning(XML_ERROR_CODES.INVALID_COMMENT, 'Commentaire non fermé correctement', token.location, 'Utilisez --> pour fermer le commentaire');
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_COMMENT);
         }
         const commentNode = new XMLNode('comment', content, token.location);
         parent.addChild(commentNode);
@@ -391,7 +394,7 @@ export class LuciformXMLParser {
         const content = token.content || '';
         if (!token.closed) {
             diagnostics.addError(XML_ERROR_CODES.INVALID_CDATA, 'Section CDATA non fermée correctement', token.location, 'Utilisez ]]> pour fermer la section CDATA');
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_CDATA);
         }
         const cdataNode = new XMLNode('cdata', content, token.location);
         parent.addChild(cdataNode);
@@ -407,7 +410,7 @@ export class LuciformXMLParser {
         }
         if (!token.closed) {
             diagnostics.addWarning(XML_ERROR_CODES.INVALID_PI, 'Instruction de traitement non fermée correctement', token.location, "Utilisez ?> pour fermer l'instruction");
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_PI);
         }
         const piNode = new XMLNode('pi', content, token.location);
         parent.addChild(piNode);

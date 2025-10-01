@@ -46,6 +46,8 @@ export interface ParseResult {
     recoveryReport?: {
         attempts: number;
         capped: boolean;
+        codes?: string[];
+        notes?: string[];
     };
 }
 export type ScannerState = 'Text' | 'StartTag' | 'EndTag' | 'Comment' | 'PI' | 'CDATA' | 'Doctype';

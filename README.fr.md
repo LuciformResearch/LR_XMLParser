@@ -120,6 +120,16 @@ new LuciformSAX(xml, {
 - Réservés: préfixe/nom `xmlns`; `xml` doit pointer vers `http://www.w3.org/XML/1998/namespace`.
 - Utilisez `findByNS(nsUri, local)` / `findAllByNS` pour une traversée ns-aware.
 
+### Référence rapide
+
+| Cas | Résolution des éléments | Résolution des attributs | Exemple |
+| --- | --- | --- | --- |
+| Namespace par défaut (`xmlns="urn:d"`) | S’applique aux noms d’éléments | Ne s’applique pas aux attributs | `<root xmlns="urn:d"><item a="1"/></root>` → `item` résout vers `urn:d:item`; `a` n’a pas de namespace |
+| Élément préfixé (`foo:bar`) | Requiert `xmlns:foo="…"` en portée | n/a | `<x xmlns:foo="urn:f"><foo:bar/></x>` → élément résout vers `urn:f:bar` |
+| Attribut préfixé (`foo:a`) | n/a | Requiert `xmlns:foo="…"` en portée | `<x xmlns:foo="urn:f" foo:a="1"/>` → attribut `a` dans `urn:f` |
+| Préfixe non lié | Diagnostic `UNDEFINED_PREFIX` | Diagnostic `UNDEFINED_PREFIX` | `<a:b/>` sans `xmlns:a` |
+| Noms réservés | Diagnostic (`XMLNS_PREFIX_RESERVED`, `XML_PREFIX_URI`) | Diagnostic | `xmlns:test`, `xml` lié à une URI incorrecte |
+
 ## Tests et validation
 
 ```bash
@@ -139,7 +149,7 @@ Validé en interne sur:
 - Consultez `result.diagnostics` pour des problèmes structurés (code, message, suggestion, position).
 - `result.success` est `false` en cas d’erreurs; en mode permissif, `document` peut rester exploitable.
 - Codes typiques: `UNCLOSED_TAG`, `MISMATCHED_TAG`, `INVALID_COMMENT`, `INVALID_CDATA`, `MAX_DEPTH_EXCEEDED`, `MAX_TEXT_LENGTH_EXCEEDED`.
- - Plafond de récupération: utilisez `maxRecoveries` pour limiter les corrections automatiques en modes permissifs. Au‑delà du plafond, le parseur s’arrête proprement, ajoute `RECOVERY_ATTEMPTED` et `PARTIAL_PARSE` (niveau info), et retourne un document partiel. Consultez `result.recoveryReport` pour `{ attempts, capped }`.
+ - Plafond de récupération: utilisez `maxRecoveries` pour limiter les corrections automatiques en modes permissifs. Au‑delà du plafond, le parseur s’arrête proprement, ajoute `RECOVERY_ATTEMPTED` et `PARTIAL_PARSE` (niveau info), et retourne un document partiel. Consultez `result.recoveryReport` pour `{ attempts, capped, codes?, notes? }`.
 
 ## Liens et intégrations
 

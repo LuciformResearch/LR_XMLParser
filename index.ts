@@ -96,12 +96,14 @@ export class LuciformXMLParser {
         `Tentative de récupération: limite maxRecoveries dépassée après ${report.attempts} corrections`,
         location
       );
+      diagnostics.addRecoveryNote('maxRecoveries exceeded: stopping further scanning');
       diagnostics.addInfo(
         XML_ERROR_CODES.PARTIAL_PARSE,
         'Parsing arrêté après dépassement de la limite de récupération',
         location,
         'Augmentez maxRecoveries pour autoriser davantage de corrections'
       );
+      diagnostics.addRecoveryNote('partial parse returned due to recovery cap');
       this.recoveryStopIssued = true;
     }
     return capped;
@@ -279,7 +281,7 @@ export class LuciformXMLParser {
           `QName invalide (trop de ':'): ${qname}`,
           loc
         );
-        diagnostics.incrementRecovery();
+        diagnostics.incrementRecovery(XML_ERROR_CODES.BAD_QNAME);
         return;
       }
       const { prefix } = splitQName(qname);
@@ -290,7 +292,7 @@ export class LuciformXMLParser {
             `Préfixe non défini: ${prefix}`,
             loc
           );
-          diagnostics.incrementRecovery();
+          diagnostics.incrementRecovery(XML_ERROR_CODES.UNDEFINED_PREFIX);
         }
       } else if (!prefix && isAttribute) {
         // default namespace does not apply to attributes
@@ -311,14 +313,14 @@ export class LuciformXMLParser {
               'Le préfixe "xmlns" est réservé',
               startToken.location
             );
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_NAMESPACE);
           } else if (prefix === 'xml' && value !== 'http://www.w3.org/XML/1998/namespace') {
             diagnostics.addError(
               XML_ERROR_CODES.INVALID_NAMESPACE,
               'Le préfixe "xml" doit être lié à http://www.w3.org/XML/1998/namespace',
               startToken.location
             );
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_NAMESPACE);
           } else {
             currentNS.set(prefix, value);
             element.setNamespace(prefix, value);
@@ -335,7 +337,7 @@ export class LuciformXMLParser {
           'Le préfixe ou nom "xmlns" est réservé',
           startToken.location
         );
-        diagnostics.incrementRecovery();
+        diagnostics.incrementRecovery(XML_ERROR_CODES.XMLNS_PREFIX_RESERVED);
       }
       checkNamespace(element.name, startToken.location, false);
     }
@@ -349,7 +351,7 @@ export class LuciformXMLParser {
             `Attribut dupliqué: ${dup}`,
             startToken.location
           );
-          diagnostics.incrementRecovery();
+          diagnostics.incrementRecovery(XML_ERROR_CODES.DUPLICATE_ATTRIBUTE);
         }
       }
       if (startToken.invalidAttributes && startToken.invalidAttributes.length > 0) {
@@ -361,14 +363,15 @@ export class LuciformXMLParser {
               `Espace requis après la valeur de "${name}"`,
               startToken.location
             );
+            diagnostics.incrementRecovery(XML_ERROR_CODES.ATTR_MISSING_SPACE);
           } else {
             diagnostics.addWarning(
               XML_ERROR_CODES.ATTR_NO_VALUE,
               `Attribut sans valeur ou non quotée: ${inval}`,
               startToken.location
             );
+            diagnostics.incrementRecovery(XML_ERROR_CODES.ATTR_NO_VALUE);
           }
-          diagnostics.incrementRecovery();
         }
       }
       let count = 0;
@@ -380,7 +383,7 @@ export class LuciformXMLParser {
             `Nombre d'attributs dépassé: > ${this.maxAttrCount}`,
             startToken.location
           );
-          diagnostics.incrementRecovery();
+          diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_ATTRIBUTE);
           continue;
         }
         if (value.length > this.maxAttrValueLength) {
@@ -389,7 +392,7 @@ export class LuciformXMLParser {
             `Valeur d'attribut trop longue (${value.length} > ${this.maxAttrValueLength}) pour ${name}`,
             startToken.location
           );
-          diagnostics.incrementRecovery();
+          diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_ATTRIBUTE);
           continue;
         }
         checkNamespace(name, startToken.location, true);
@@ -434,7 +437,7 @@ export class LuciformXMLParser {
               token.location,
               `Fermez la balise ${element.name}`
             );
-            diagnostics.incrementRecovery();
+            diagnostics.incrementRecovery(XML_ERROR_CODES.MISMATCHED_TAG);
           }
           break;
         }
@@ -467,7 +470,7 @@ export class LuciformXMLParser {
         startToken.location,
         `Ajoutez </${element.name}>`
       );
-      diagnostics.incrementRecovery();
+      diagnostics.incrementRecovery(XML_ERROR_CODES.UNCLOSED_TAG);
     }
 
     return element;
@@ -522,7 +525,7 @@ export class LuciformXMLParser {
         token.location,
         'Utilisez --> pour fermer le commentaire'
       );
-      diagnostics.incrementRecovery();
+      diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_COMMENT);
     }
 
     const commentNode = new XMLNode('comment', content, token.location);
@@ -546,7 +549,7 @@ export class LuciformXMLParser {
         token.location,
         'Utilisez ]]> pour fermer la section CDATA'
       );
-      diagnostics.incrementRecovery();
+      diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_CDATA);
     }
 
     const cdataNode = new XMLNode('cdata', content, token.location);
@@ -579,7 +582,7 @@ export class LuciformXMLParser {
         token.location,
         "Utilisez ?> pour fermer l'instruction"
       );
-      diagnostics.incrementRecovery();
+      diagnostics.incrementRecovery(XML_ERROR_CODES.INVALID_PI);
     }
 
     const piNode = new XMLNode('pi', content, token.location);
