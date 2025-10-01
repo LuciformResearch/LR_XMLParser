@@ -1,6 +1,6 @@
 {
   "name": "@luciformresearch/xmlparser",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "High-performance XML parser for LLM workflows and general XML with robust diagnostics and permissive mode.",
   "license": "MIT",
   "author": "Lucie Defraiteur <luciedefraiteur@luciformresearch.com>",

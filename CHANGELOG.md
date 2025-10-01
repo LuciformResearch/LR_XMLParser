@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+- 0.2.1
+  - Recovery policy: implement behavioral cap when `maxRecoveries` is exceeded — stop further scanning, add `RECOVERY_ATTEMPTED` and `PARTIAL_PARSE` info diagnostics, return partial document.
+  - Add unit test `tests/recovery-cap.spec.ts` to verify early stop and summary diagnostics.
+  - Update README (EN/FR) to document `maxRecoveries` and `recoveryReport`.
+
+- 0.2.0
+  - Add minimal SAX interface (`LuciformSAX`) and export as subpath: `@luciformresearch/xmlparser/sax`.
+  - Add `recoveryReport { attempts, capped }` to parse result.
+  - Namespaces, DOCTYPE fidelity, attribute limits/diagnostics refinements; README updates and CI polishing.
+
 - 0.1.3
   - Fix ESM Node compatibility (explicit .js extensions in dist/esm)
   - Switch CJS to nested package `type: commonjs`

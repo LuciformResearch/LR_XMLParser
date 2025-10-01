@@ -25,11 +25,13 @@ export declare class LuciformXMLParser {
     private useUnicodeNames;
     private mode;
     private maxRecoveries?;
+    private recoveryStopIssued;
     constructor(content: string, options?: ParserOptions);
     /**
      * Parse le XML avec mode Luciform-permissif
      */
     parse(): ParseResult;
+    private maybeStopOnRecoveryCap;
     /**
      * Parse un document XML complet
      */

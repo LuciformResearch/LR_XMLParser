@@ -139,6 +139,7 @@ Validé en interne sur:
 - Consultez `result.diagnostics` pour des problèmes structurés (code, message, suggestion, position).
 - `result.success` est `false` en cas d’erreurs; en mode permissif, `document` peut rester exploitable.
 - Codes typiques: `UNCLOSED_TAG`, `MISMATCHED_TAG`, `INVALID_COMMENT`, `INVALID_CDATA`, `MAX_DEPTH_EXCEEDED`, `MAX_TEXT_LENGTH_EXCEEDED`.
+ - Plafond de récupération: utilisez `maxRecoveries` pour limiter les corrections automatiques en modes permissifs. Au‑delà du plafond, le parseur s’arrête proprement, ajoute `RECOVERY_ATTEMPTED` et `PARTIAL_PARSE` (niveau info), et retourne un document partiel. Consultez `result.recoveryReport` pour `{ attempts, capped }`.
 
 ## Liens et intégrations
 

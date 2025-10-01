@@ -102,6 +102,12 @@ export class DiagnosticManager {
         return { attempts: this.recoveryCount, capped: this.recoveryCapped };
     }
     /**
+     * Indique si la limite de récupération a été dépassée
+     */
+    isRecoveryCapped() {
+        return this.recoveryCapped;
+    }
+    /**
      * Vérifie s'il y a des erreurs
      */
     hasErrors() {

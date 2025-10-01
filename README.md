@@ -137,6 +137,7 @@ new LuciformSAX(xml, {
 - Inspect `result.diagnostics` for structured issues (code, message, suggestion, location).
 - `result.success` is false when errors are present; permissive mode may still return a usable `document`.
 - Typical codes: `UNCLOSED_TAG`, `MISMATCHED_TAG`, `INVALID_COMMENT`, `INVALID_CDATA`, `MAX_DEPTH_EXCEEDED`, `MAX_TEXT_LENGTH_EXCEEDED`.
+ - Recovery cap: set `maxRecoveries` to cap automatic fixes in permissive modes. When the cap is exceeded, the parser stops further scanning, adds `RECOVERY_ATTEMPTED` and `PARTIAL_PARSE` info diagnostics, and returns a partial document. See `result.recoveryReport` for `{ attempts, capped }`.
 
 ## Testing and validation
 

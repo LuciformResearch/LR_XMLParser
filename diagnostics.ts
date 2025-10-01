@@ -118,6 +118,13 @@ export class DiagnosticManager {
   }
 
   /**
+   * Indique si la limite de récupération a été dépassée
+   */
+  isRecoveryCapped(): boolean {
+    return this.recoveryCapped;
+  }
+
+  /**
    * Vérifie s'il y a des erreurs
    */
   hasErrors(): boolean {

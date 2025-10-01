@@ -57,6 +57,10 @@ export declare class DiagnosticManager {
         capped: boolean;
     };
     /**
+     * Indique si la limite de récupération a été dépassée
+     */
+    isRecoveryCapped(): boolean;
+    /**
      * Vérifie s'il y a des erreurs
      */
     hasErrors(): boolean;

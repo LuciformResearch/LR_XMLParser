@@ -17,6 +17,7 @@ import { DiagnosticManager, XML_ERROR_CODES } from './diagnostics.js';
 import { XMLNode } from './document.js';
 export class LuciformXMLParser {
     constructor(content, options = {}) {
+        this.recoveryStopIssued = false;
         this.content = content;
         this.maxDepth = options.maxDepth || 50;
         this.maxTextLength = options.maxTextLength || 100000;
@@ -60,6 +61,16 @@ export class LuciformXMLParser {
             recoveryReport,
         };
     }
+    maybeStopOnRecoveryCap(diagnostics, location) {
+        const capped = diagnostics.isRecoveryCapped();
+        if (capped && !this.recoveryStopIssued) {
+            const report = diagnostics.getRecoveryReport();
+            diagnostics.addInfo(XML_ERROR_CODES.RECOVERY_ATTEMPTED, `Tentative de récupération: limite maxRecoveries dépassée après ${report.attempts} corrections`, location);
+            diagnostics.addInfo(XML_ERROR_CODES.PARTIAL_PARSE, 'Parsing arrêté après dépassement de la limite de récupération', location, 'Augmentez maxRecoveries pour autoriser davantage de corrections');
+            this.recoveryStopIssued = true;
+        }
+        return capped;
+    }
     /**
      * Parse un document XML complet
      */
@@ -69,6 +80,9 @@ export class LuciformXMLParser {
         // Base namespace frame
         const baseNS = new Map([['xml', 'http://www.w3.org/XML/1998/namespace']]);
         while ((token = scanner.next()) !== null) {
+            if (this.maybeStopOnRecoveryCap(diagnostics, token.location)) {
+                break;
+            }
             switch (token.type) {
                 case 'PI': {
                     if (token.content?.startsWith('xml')) {
@@ -94,6 +108,10 @@ export class LuciformXMLParser {
                     const element = this.parseElement(scanner, token, diagnostics, 0, baseNS);
                     if (element) {
                         document.addChild(element);
+                    }
+                    if (this.maybeStopOnRecoveryCap(diagnostics, token.location)) {
+                        // Arrêt contrôlé au niveau document
+                        token = null;
                     }
                     break;
                 }
@@ -285,9 +303,16 @@ export class LuciformXMLParser {
         if (startToken.selfClosing) {
             return element;
         }
+        // Arrêt immédiat si la limite de récupération est dépassée après le traitement des attributs
+        if (this.maybeStopOnRecoveryCap(diagnostics, startToken.location)) {
+            return element;
+        }
         // Parser les enfants
         let token;
         while ((token = scanner.next()) !== null) {
+            if (this.maybeStopOnRecoveryCap(diagnostics, token.location)) {
+                return element;
+            }
             switch (token.type) {
                 case 'StartTag': {
                     const childElement = this.parseElement(scanner, token, diagnostics, depth + 1, currentNS);
