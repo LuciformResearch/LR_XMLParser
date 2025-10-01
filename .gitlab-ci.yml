@@ -1,0 +1,35 @@
+stages:
+  - build
+  - publish
+
+variables:
+  NODE_VERSION: "20"
+
+build:package:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - node -v
+    - npm ci || npm i
+    - npm run build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 week
+
+publish:npm:
+  stage: publish
+  image: node:${NODE_VERSION}
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm ci || npm i
+    - npm run build
+    - npm publish --access public
+  secrets:
+    GIT_STRATEGY: none
+  dependencies: []
+  only:
+    - tags
+

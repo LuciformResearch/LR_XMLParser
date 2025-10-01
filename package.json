@@ -1,0 +1,74 @@
+{
+  "name": "@luciformresearch/xmlparser",
+  "version": "0.1.0",
+  "description": "High-performance XML parser for LLM workflows and general XML with robust diagnostics and permissive mode.",
+  "license": "MIT",
+  "author": "Lucie Defraiteur <luciedefraiteur@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/luciformresearch/lr_xmlparser.git"
+  },
+  "bugs": {
+    "url": "https://gitlab.com/luciformresearch/lr_xmlparser/issues"
+  },
+  "homepage": "https://gitlab.com/luciformresearch/lr_xmlparser#readme",
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs",
+      "default": "./dist/esm/index.js"
+    },
+    "./scanner": {
+      "types": "./dist/types/scanner.d.ts",
+      "import": "./dist/esm/scanner.js",
+      "require": "./dist/cjs/scanner.cjs"
+    },
+    "./document": {
+      "types": "./dist/types/document.d.ts",
+      "import": "./dist/esm/document.js",
+      "require": "./dist/cjs/document.cjs"
+    },
+    "./diagnostics": {
+      "types": "./dist/types/diagnostics.d.ts",
+      "import": "./dist/esm/diagnostics.js",
+      "require": "./dist/cjs/diagnostics.cjs"
+    },
+    "./types": {
+      "types": "./dist/types/types.d.ts",
+      "default": "./dist/types/types.d.ts"
+    },
+    "./migration": {
+      "types": "./dist/types/migration.d.ts",
+      "import": "./dist/esm/migration.js",
+      "require": "./dist/cjs/migration.cjs"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "README.en.md"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node scripts/rename-cjs.mjs",
+    "build:types": "tsc -p tsconfig.types.json",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:types",
+    "prepare": "npm run build",
+    "test": "node dist/cjs/test-integration.cjs || echo 'Run build first'",
+    "release": "npm version patch && git tag v$npm_package_version"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

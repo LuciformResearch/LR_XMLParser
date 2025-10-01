@@ -1,0 +1,142 @@
+# LR XMLParser — Modular, robust and safe XML parser
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Benchmarks](https://img.shields.io/badge/Benchmarks-~2x%20faster-green)](./test-integration.ts)
+[![Status](https://img.shields.io/badge/Status-Ready%20for%20LLM%20workflows-success)](#key-use-cases)
+
+High‑performance XML parser designed for modern AI pipelines. LR XMLParser is optimized for LLM‑generated XML (permissive mode with error recovery) while remaining strict, traceable, and secure for production workloads.
+
+Project by LuciformResearch (Lucie Defraiteur).
+
+— Français: see README.md
+
+## License
+
+MIT with reinforced attribution. See [LICENSE](LICENSE) for terms, attribution obligations, and allowed uses.
+
+## Overview
+
+LR XMLParser follows a modular architecture (scanner → parser → models → diagnostics), refactored from a monolithic file (~1468 LOC) into focused components. Result: more readable, testable, and faster code.
+
+### Key use cases
+
+- Structured LLM responses ("luciform‑permissive" mode to tolerate and recover from common LLM formatting issues).
+- General XML parsing with precise diagnostics (line/column) and configurable limits.
+- Integration in AI pipelines (LR HMM) and larger systems (LR Hub).
+
+Example within a hierarchical memory engine:
+```ts
+const parser = new LuciformXMLParser(xml, {
+  mode: 'luciform-permissive',
+  maxTextLength: 100_000,
+});
+const result = parser.parse();
+if (result.success) {
+  const summary = result.document?.findElement('summary')?.getText();
+}
+```
+
+## Code structure
+
+```
+lr_xmlparser/
+├── index.ts         # Main parser (public API)
+├── scanner.ts       # Stateful tokenizer
+├── document.ts      # XML models (Document/Element/Node)
+├── diagnostics.ts   # Diagnostics (codes, messages, suggestions)
+├── migration.ts     # Compatibility layer (legacy → new)
+├── types.ts         # Shared types and interfaces
+└── test-integration.ts
+```
+
+## Why LR XMLParser
+
+- Performance: ~2× faster than the previous implementation on our internal sets (see `test-integration.ts`).
+- Maintainability: 50–300 LOC modules, clear separation of concerns.
+- Testability: isolated components, validated integration, easier debugging.
+- Reusability: standalone scanner, extensible diagnostics, independent models.
+- LLM‑oriented: permissive mode, error recovery, CDATA handling, format tolerance.
+
+## Express API
+
+```ts
+export class LuciformXMLParser {
+  constructor(content: string, options?: ParserOptions);
+  parse(): ParseResult;
+}
+```
+
+Options include security and performance limits (depth, text length, entity expansion), plus mode: `strict | permissive | luciform-permissive`.
+
+## Migration from the legacy parser
+
+```ts
+// Old
+import { LuciformXMLParser } from './llm/LuciformXMLParser';
+
+// New
+import { LuciformXMLParser } from './xml-parser/index';
+
+// Or keep the same API via a compatibility wrapper
+import { LuciformXMLParserCompat } from './xml-parser/migration';
+```
+
+## Testing and validation
+
+```bash
+npx tsx test-xml-refactor.ts
+```
+
+Validated internally on:
+- Valid simple XML
+- Malformed XML (permissive mode)
+- Complex XML with CDATA and comments
+- Performance and limits
+- Legacy API compatibility
+
+## Links and integrations
+
+- GitLab (source): https://gitlab.com/luciformresearch/lr_xmlparser
+- GitHub mirror: https://github.com/LuciformResearch/LR_XMLParser
+- Used by:
+  - LR HMM (L1/L2 memory compression, "xmlEngine")
+    - GitLab: https://gitlab.com/luciformresearch/lr_hmm
+    - GitHub: https://github.com/LuciformResearch/LR_HMM
+  - LR Hub (origin/base): https://gitlab.com/luciformresearch/lr_chat
+
+## Contributing
+
+PRs welcome.
+- Fork → feature branch → MR/PR
+- Keep modules focused; avoid unnecessary deps
+- Add tests for affected modules
+
+## Support
+
+- Issues: open on GitLab
+- Questions: GitLab discussions or direct contact
+- Contact: luciedefraiteur@gmail.com
+
+—
+
+Status: refactor complete • Performance: ~2× faster • Maintainability: modular architecture • Compatibility: smooth migration
+
+## Getting started (npm)
+
+- Install (after publish):
+  - `npm install @luciformresearch/xmlparser`
+  - `pnpm add @luciformresearch/xmlparser`
+
+- Examples (ESM and CommonJS):
+  ```ts
+  // ESM
+  import { LuciformXMLParser } from '@luciformresearch/xmlparser';
+  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+  ```
+  ```js
+  // CommonJS
+  const { LuciformXMLParser } = require('@luciformresearch/xmlparser');
+  const result = new LuciformXMLParser(xml, { mode: 'luciform-permissive' }).parse();
+  ```
+
+- Subpath exports (optional): `@luciformresearch/xmlparser/document`, `.../scanner`, `.../diagnostics`, `.../types`, `.../migration`.

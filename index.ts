@@ -398,8 +398,7 @@ export class LuciformXMLParser {
   }
 }
 
-// Réexporter tous les types et classes pour compatibilité
-export * from './types';
+// Réexporter les classes/utilitaires principaux (éviter les conflits de noms avec ./types)
 export * from './scanner';
 export * from './document';
 export * from './diagnostics';
